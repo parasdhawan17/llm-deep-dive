@@ -103,8 +103,8 @@ footer a{color:var(--accent)}
   <h1>LLM Deep Dive: <span class="em">how they actually work</span></h1>
   <p class="lede">Not just how to <em>use</em> AI models — how they work internally, why GPT, Claude, Gemini and DeepSeek behave differently, how they're trained, and how to choose and optimize them for real systems. Written for working software engineers, from first principles.</p>
   <div class="badges">
-    <span class="badge">6 modules</span><span class="badge">Module 1 published</span>
-    <span class="badge">Math included, no PhD required</span><span class="badge">Engineer-tutor voice</span>
+    <span class="badge">6 modules</span><span class="badge">All 6 modules published</span>
+    <span class="badge">Simplified Technical English (ASD-STE100)</span><span class="badge">Engineer-tutor voice</span>
   </div>
   <div class="cta-row">
     <a class="btn primary" href="#module-1">Start Module 1</a>
@@ -116,66 +116,75 @@ footer a{color:var(--accent)}
   <h2>Course map</h2>
   <ol>
     <li><a href="#module-1">AI &amp; LLM Fundamentals</a> — the landscape, language models, Transformers &amp; attention</li>
-    <li><a href="#roadmap">Training LLMs</a><span class="soon">next</span> — pretraining, SFT, RLHF/DPO, data &amp; scaling laws</li>
-    <li><a href="#roadmap">Why models behave differently</a><span class="soon">planned</span> — GPT vs Claude vs Gemini vs DeepSeek vs open weights</li>
-    <li><a href="#roadmap">Choosing a model</a><span class="soon">planned</span> — evals, benchmarks vs your workload, cost/latency trade-offs</li>
-    <li><a href="#roadmap">Optimizing for real apps</a><span class="soon">planned</span> — prompting, RAG, fine-tuning, inference optimization</li>
-    <li><a href="#roadmap">Open vs closed &amp; deployment</a><span class="soon">planned</span> — self-hosting, quantization, serving stacks</li>
+    <li><a href="#module-2">Training LLMs</a> — pretraining, SFT, RLHF/DPO, data &amp; scaling laws</li>
+    <li><a href="#module-3">Why models behave differently</a> — GPT vs Claude vs Gemini vs DeepSeek vs open weights</li>
+    <li><a href="#module-4">Choosing a model</a> — evals, benchmarks vs your workload, cost/latency trade-offs</li>
+    <li><a href="#module-5">Optimizing for real apps</a> — prompting, RAG, fine-tuning, inference optimization</li>
+    <li><a href="#module-6">Open vs closed &amp; deployment</a> — self-hosting, quantization, serving stacks</li>
   </ol>
 </nav>
 
 <!-- ==================== MODULE 1 ==================== -->
 <section class="mod" id="module-1">
   <div class="mod-head"><span class="mod-num">MODULE 1</span><h2>AI &amp; LLM Fundamentals</h2></div>
-  <p>Goal: build a precise mental model of the whole stack — from "AI" the buzzword down to the attention operation that powers every modern LLM. Everything later (training, RLHF, RAG, fine-tuning) attaches to this frame.</p>
+  <p>Goal: Build a clear mental model of the full stack.</p>
+  <p>You start from the word "AI". You end at the attention operation. Attention is the core of every modern LLM.</p>
+  <p>Later modules attach to this frame. They cover training, RLHF, RAG, and fine-tuning.</p>
 
   <!-- LESSON 1.1 -->
   <article class="lesson" id="l11">
     <p class="lno">Lesson 1.1</p>
-    <h3>AI, ML, Deep Learning, Generative AI, LLMs — the real hierarchy</h3>
-    <p>These terms nest inside each other like Russian dolls. Most confusion in the industry comes from using them interchangeably.</p>
+    <h3>AI, Machine Learning, Deep Learning, Generative AI, and LLMs — the hierarchy</h3>
+    <p>These terms fit inside each other, like boxes inside boxes.</p>
+    <p>AI is the largest box. Each smaller box is a special case. Most confusion comes from mixing the names.</p>
     <table>
       <tr><th>Term</th><th>What it actually means</th><th>Example</th></tr>
-      <tr><td><strong>Artificial Intelligence</strong></td><td>Any system that performs tasks normally requiring human intelligence — reasoning, perception, language, planning. Includes non-learning systems.</td><td>Chess engines, rule-based chatbots, A* pathfinding</td></tr>
-      <tr><td><strong>Machine Learning</strong></td><td>AI where behavior is <em>learned from data</em> rather than hand-coded: fit a function <code>f(x) → y</code> by minimizing error on examples.</td><td>Spam filters, credit scoring, recommendation rankers</td></tr>
-      <tr><td><strong>Deep Learning</strong></td><td>ML using multi-layer neural networks that learn hierarchical representations (edges → shapes → objects; characters → words → concepts).</td><td>Image classifiers, speech recognition</td></tr>
-      <tr><td><strong>Generative AI</strong></td><td>Deep learning models that learn a data <em>distribution</em> and <em>sample new items</em> from it, rather than classifying inputs.</td><td>LLMs, diffusion image models, voice synthesis</td></tr>
-      <tr><td><strong>LLMs</strong></td><td>Generative models over <em>language</em>: giant Transformers trained on text that model <code>P(next token | previous tokens)</code>.</td><td>GPT, Claude, Gemini, DeepSeek, Llama</td></tr>
+      <tr><td><strong>Artificial Intelligence</strong></td><td>A system that does tasks that need human intelligence. Examples are reasoning, language, and planning. It includes systems that do not learn.</td><td>Chess engines, rule-based chatbots, A* pathfinding</td></tr>
+      <tr><td><strong>Machine Learning</strong></td><td>AI that learns from data. You do not write the rules. You give examples. The model learns a function <code>f(x) → y</code>. It reduces the error on the examples.</td><td>Spam filters, credit scoring, recommendation rankers</td></tr>
+      <tr><td><strong>Deep Learning</strong></td><td>ML with neural networks. A neural network has many layers of simple units. It learns features in steps. Example: edges, then shapes, then objects.</td><td>Image classifiers, speech recognition</td></tr>
+      <tr><td><strong>Generative AI</strong></td><td>Deep learning that learns the distribution of data. A distribution is a set of probabilities. The model then creates new data from it. It does not classify input.</td><td>LLMs, diffusion image models, voice synthesis</td></tr>
+      <tr><td><strong>LLMs</strong></td><td>A generative model of language. It is a large Transformer. It trains on text. It models <code>P(next token | previous tokens)</code>.</td><td>GPT, Claude, Gemini, DeepSeek, Llama</td></tr>
     </table>
-    <h4>The one-sentence discriminator</h4>
+    <h4>The difference in one sentence</h4>
     <ul>
-      <li>Classical ML <strong>predicts a label</strong> for an input (discriminative).</li>
-      <li>Generative AI <strong>produces new data</strong> that looks like its training distribution (generative).</li>
-      <li>An LLM is "just" a generative model whose data is text — and text turns out to encode reasoning, code, facts, and style, which is why the same mechanism does so many jobs.</li>
+      <li>Classical ML predicts a label for an input.</li>
+      <li>Generative AI creates new data. The new data looks like the training data.</li>
+      <li>An LLM is a generative model of text. Text holds facts, code, style, and reasoning. One simple rule gives many skills.</li>
     </ul>
-    <div class="callout"><strong>Mental model</strong>Think of it as specialization layers: AI is the field, ML the dominant method, deep learning the dominant architecture family, generative AI the dominant <em>task shape</em> since ~2020, and LLMs the dominant generative model class. When someone says "AI" today they usually mean LLMs — now you know exactly how much that collapses.</div>
-    <h4>A 70-year timeline in 6 beats</h4>
+    <div class="callout"><strong>Mental model</strong>Think in layers. AI is the field. ML is the main method. Deep learning is the main model family. Generative AI is the main task type since 2020. LLMs are the main generative models. When people say "AI" today, they often mean LLMs. Now you see the full picture.</div>
+    <h4>A 70-year timeline in six steps</h4>
     <ol>
-      <li><strong>1950s–80s:</strong> symbolic AI — hand-written rules and logic. Brittle outside narrow domains.</li>
-      <li><strong>1990s–2000s:</strong> statistical ML — SVMs, decision trees; humans engineer features, models learn weights.</li>
-      <li><strong>2012:</strong> deep learning goes mainstream (AlexNet) — networks learn the features themselves.</li>
-      <li><strong>2017:</strong> <strong>"Attention Is All You Need"</strong> — the Transformer replaces recurrence; parallelizable, scalable.</li>
-      <li><strong>2020:</strong> GPT-3 shows <em>scale alone</em> unlocks few-shot behavior — the "foundation model" era begins.</li>
-      <li><strong>2022–now:</strong> instruction tuning + RLHF turn raw predictors into assistants; open-weight models (Llama, DeepSeek, Mistral) make the stack inspectable and self-hostable.</li>
+      <li><strong>1950s–80s:</strong> Symbolic AI. People wrote rules by hand. The rules worked only in narrow tasks.</li>
+      <li><strong>1990s–2000s:</strong> Statistical ML. Common models: SVMs and decision trees. People designed the features. Models learned the weights.</li>
+      <li><strong>2012:</strong> Deep learning becomes popular (AlexNet). Networks learn the features themselves.</li>
+      <li><strong>2017:</strong> "Attention Is All You Need". The Transformer replaces recurrence. It trains in parallel. It scales well.</li>
+      <li><strong>2020:</strong> GPT-3 shows that scale alone gives new skills. Few-shot learning appears. The era of foundation models starts. A foundation model is a large model trained on broad data. People adapt it to many tasks.</li>
+      <li><strong>2022–now:</strong> Instruction tuning and RLHF make raw models act as assistants. Open-weight models appear: Llama, DeepSeek, Mistral. You can inspect and run them yourself.</li>
     </ol>
   </article>
 
   <!-- LESSON 1.2 -->
   <article class="lesson" id="l12">
     <p class="lno">Lesson 1.2</p>
-    <h3>What a language model is — and how it generates responses</h3>
-    <p>A language model is a <strong>probability distribution over sequences of tokens</strong>. Given everything so far, it scores how likely each possible next token is:</p>
+    <h3>What a language model is — and how it writes answers</h3>
+    <p>A language model predicts the next token. It uses all previous tokens.</p>
+    <p>A distribution is a set of probabilities. It shows how likely each next token is.</p>
     <div class="math">P(token<sub>t+1</sub> | token<sub>1</sub> … token<sub>t</sub>)</div>
-    <p>That's the entire core. A 70B-parameter model is, at inference time, an extremely sophisticated next-token guesser. Everything impressive — reasoning, code, translation — is <em>emergent behavior of predicting the next token well, at scale</em>.</p>
+    <p>Read it as: the probability of the next token, given all tokens before it.</p>
+    <p>A 70B model does only this one task when it answers. It is a predictor of the next token. New skills appear from this simple rule. We call this emergent behavior. Emergent behavior is a new ability that appears from simple rules.</p>
     <h4>Tokens, not words</h4>
-    <p>Models don't see characters or words; they see <strong>tokens</strong> — chunks from a fixed vocabulary (typically 32k–200k entries) learned by algorithms like BPE. <code>"unbelievable"</code> might be <code>["un", "believ", "able"]</code>. Consequences engineers must internalize:</p>
+    <p>Models do not read words. They read tokens. A token is a small piece of text. It can be a word or part of a word.</p>
+    <p>The tokenizer changes text to tokens and back. It uses a fixed list. This list is the vocabulary. A vocabulary has 32,000 to 200,000 entries. Byte Pair Encoding (BPE) is a common algorithm. It builds the vocabulary from text.</p>
+    <p>Example: <code>"unbelievable"</code> can become <code>["un", "believ", "able"]</code>.</p>
+    <p>Three facts matter for engineers:</p>
     <ul>
-      <li><strong>Context limits are token limits</strong> (128k tokens ≈ ~95k English words).</li>
-      <li><strong>Cost is per token</strong> — input and output priced separately.</li>
-      <li>Tokenization explains quirks: why models fumble at counting letters ("how many r's in strawberry?") — they never saw letters, only token chunks.</li>
+      <li><strong>Context limits are token limits.</strong> 128,000 tokens are about 95,000 English words.</li>
+      <li><strong>Cost is per token.</strong> Input and output have different prices.</li>
+      <li><strong>Tokenization explains errors.</strong> Models cannot count letters in a word. They never see letters. They see only token pieces.</li>
     </ul>
     <h4>Generation: the autoregressive loop</h4>
-    <p>To produce text, the model runs a loop — this is worth visualizing as code, because it demystifies "thinking":</p>
+    <p>The model writes text in a loop. Each step adds one token.</p>
+    <p>Autoregressive means this: the model uses its own output as new input.</p>
 <pre><code>tokens = tokenize(prompt)
 while not done:
     logits = model(tokens)            # raw scores for every vocab token
@@ -184,69 +193,95 @@ while not done:
     tokens.append(next)
     if next == EOS or len(tokens) > max_len: done = True
 return detokenize(tokens)</code></pre>
-    <p>Each new token is <strong>appended and fed back in</strong> — hence <em>autoregressive</em>. The model never "plans" a paragraph; coherence emerges because each step conditions on all previous steps.</p>
-    <h4>Decoding: where the randomness (and control) lives</h4>
+    <p>The code shows each step. Here is the same loop as actions:</p>
+    <ol>
+      <li>Change the prompt to tokens.</li>
+      <li>Ask the model for logits. Logits are raw scores. There is one logit for each token.</li>
+      <li>Change the logits to probabilities. Use softmax and temperature. Softmax is a function. It changes scores to probabilities that sum to 1.</li>
+      <li>Select one token from the probabilities. This selection is sampling.</li>
+      <li>Add the token to the sequence.</li>
+      <li>Stop if the token is EOS or if the sequence is too long. EOS means end of sequence.</li>
+      <li>If you did not stop, repeat from step 2.</li>
+      <li>Change the tokens back to text.</li>
+    </ol>
+    <p>The model does not plan a paragraph. Each step uses all previous steps. This gives coherent text.</p>
+    <h4>Decoding: randomness and control</h4>
     <table>
       <tr><th>Knob</th><th>What it does</th><th>When to use it</th></tr>
-      <tr><td><code>temperature</code></td><td>Sharpens (<code>T→0</code>, deterministic) or flattens (<code>T→1+</code>, creative/random) the distribution.</td><td><code>T≈0</code> for code, extraction, evals; <code>0.7–1.0</code> for brainstorming, writing.</td></tr>
-      <tr><td><code>top_p</code> (nucleus)</td><td>Samples from the smallest set of tokens covering <code>p</code> of probability mass.</td><td><code>0.9–0.95</code> general default; lower for focus.</td></tr>
-      <tr><td><code>top_k</code></td><td>Restricts sampling to the <code>k</code> most likely tokens.</td><td>Alternative to <code>top_p</code>; common in open models.</td></tr>
-      <tr><td><code>max_tokens</code>, stop sequences</td><td>Hard caps on length / termination signals.</td><td>Always set in production to bound cost.</td></tr>
+      <tr><td><code>temperature</code></td><td>Makes the distribution sharp or flat. T near 0 gives fixed output. T near 1 or more gives varied output.</td><td>Use T near 0 for code, data extraction, and tests. Use 0.7 to 1.0 for ideas and writing.</td></tr>
+      <tr><td><code>top_p</code> (nucleus)</td><td>Selects from the smallest set of tokens with total probability p.</td><td>0.9 to 0.95 is a common default. Use a lower value for more focus.</td></tr>
+      <tr><td><code>top_k</code></td><td>Uses only the k most likely tokens.</td><td>An option instead of top_p. Common in open models.</td></tr>
+      <tr><td><code>max_tokens</code>, stop sequences</td><td>Hard limits on length. Signals to stop.</td><td>Always set them in production. They limit cost.</td></tr>
     </table>
-    <div class="callout violet"><strong>Why the same prompt gives different answers</strong>Sampling is stochastic by design. Same prompt + <code>T &gt; 0</code> → different token draws → different continuations. This is a feature (diversity) and the reason evals and production pipelines pin <code>T=0</code> + seeds when determinism matters.</div>
-    <div class="callout amber"><strong>Key limitation to carry forward</strong>A base LM predicts <em>likely</em> text, not <em>true</em> text. Fluency ≠ factuality. Hallucination isn't a bug in the mechanism — it's the mechanism operating without grounding. Fixes (RAG, tool use, verification) all live <em>outside</em> this loop; Module 5 covers them.</div>
+    <div class="callout violet"><strong>Why the same prompt gives different answers</strong>Sampling selects by chance. The same prompt with T above 0 gives different tokens. Different tokens give different text. This is useful for variety. Note: For tests and production, set T to 0 and fix the seed. Then the output is stable.</div>
+    <div class="callout amber"><strong>A key limit</strong>A base language model predicts likely text. It does not predict true text. Fluent text is not always factual text. Note: Hallucination is not a defect of the loop. Hallucination means the model writes text that sounds true but is not true. The loop has no source of truth. Fixes live outside the loop. RAG is one fix. RAG means retrieval-augmented generation. It gives the model documents to read before it answers. Module 5 describes these fixes.</div>
     <div class="quiz"><h4>Check your understanding</h4>
       <ol>
-        <li>Why does lowering temperature make output more deterministic, mathematically?</li>
-        <li>A model miscounts letters in a word. Explain using tokenization.</li>
-        <li>Is beam search "smarter" than sampling? When would you prefer each?</li>
+        <li>Why does a lower temperature give more fixed output? Use math in your answer.</li>
+        <li>A model miscounts letters in a word. Explain this with tokenization.</li>
+        <li>Is beam search better than sampling? When do you use each method?</li>
       </ol>
-      <details><summary>Hints</summary>1. Softmax divides logits by T; as T→0 the largest logit dominates → argmax. 2. The model operates on token IDs, not characters; "strawberry" may be 2–3 tokens. 3. Beam search maximizes sequence likelihood (good for translation); sampling gives diversity (good for creative tasks).</details>
+      <details><summary>Hints</summary>1. Softmax divides logits by T. As T nears 0, the largest logit wins. The result nears argmax. 2. The model uses token IDs, not letters. "Strawberry" can be 2 or 3 tokens. 3. Beam search is a method. It keeps the best few options at each step. It finds the most likely sequence. Use it for translation. Sampling gives variety. Use it for creative tasks.</details>
     </div>
   </article>
 
   <!-- LESSON 1.3 -->
   <article class="lesson" id="l13">
     <p class="lno">Lesson 1.3</p>
-    <h3>Transformers &amp; attention — the engine room</h3>
-    <p>Before 2017, sequence models were <strong>recurrent</strong> (RNNs/LSTMs): they processed tokens one at a time, carrying a hidden state. Two fatal problems: <strong>no parallelism</strong> (step <code>t</code> waits for <code>t−1</code>) and <strong>vanishing gradients</strong> over long distances. The Transformer ("Attention Is All You Need", Vaswani et al., 2017) deleted recurrence entirely and replaced it with <strong>attention</strong>.</p>
+    <h3>Transformers and attention — the main mechanism</h3>
+    <p>Before 2017, sequence models were recurrent. RNNs and LSTMs are recurrent models. They read one token at a time. They keep a hidden state. The hidden state is the memory of the model.</p>
+    <p>They had two large problems. First, no parallel work. Step t waits for step t−1. Second, the vanishing gradient problem. Gradients are the training signals. Over long sequences they become very small. Then learning stops.</p>
+    <p>The Transformer removed recurrence. The paper is "Attention Is All You Need" (Vaswani et al., 2017). It uses attention instead.</p>
     <h4>Attention in one paragraph</h4>
-    <p>When processing a token, attention lets it <strong>look at every other token</strong> and pull in a weighted blend of their information — weights decided by learned relevance. In <em>"The animal didn't cross the street because it was too tired"</em>, attention lets <em>"it"</em> strongly weight <em>"animal"</em> over <em>"street"</em>. That dynamic, content-based routing is the whole trick.</p>
-    <h4>Self-attention, concretely: Q, K, V</h4>
-    <p>Each token's embedding is projected into three vectors:</p>
+    <p>Attention lets a token see all other tokens. It combines their information with weights. The weights come from learned relevance.</p>
+    <p>Example: "The animal didn't cross the street because it was too tired". The word "it" must link to "animal". Attention gives a high weight to "animal". It gives a low weight to "street". This selection by content is the main idea.</p>
+    <h4>Self-attention: Q, K, and V</h4>
+    <p>Self-attention is attention inside one sequence. The model changes each token embedding into three vectors. An embedding is a vector. A vector is a list of numbers. It represents the token.</p>
     <ul>
-      <li><strong>Query (Q)</strong> — "what am I looking for?"</li>
-      <li><strong>Key (K)</strong> — "what do I contain / advertise?"</li>
-      <li><strong>Value (V)</strong> — "what do I actually contribute if selected?"</li>
+      <li><strong>Query (Q):</strong> what the token requests.</li>
+      <li><strong>Key (K):</strong> what the token offers.</li>
+      <li><strong>Value (V):</strong> what the token gives if selected.</li>
     </ul>
-    <p>Relevance of token <code>j</code> to token <code>i</code> = dot product <code>Q_i · K_j</code>. Normalize with softmax, use as weights over <code>V</code>:</p>
+    <p>The relevance of token j to token i is the dot product Q_i · K_j. The dot product measures the match of two vectors. Softmax changes the scores to weights. The weights select the V vectors.</p>
     <div class="math">Attention(Q, K, V) = softmax(QK<sup>T</sup> / √d<sub>k</sub>) · V</div>
-    <p>The <code>√d_k</code> scaling keeps dot products from exploding in high dimensions (which would saturate softmax and kill gradients). That's the entire operation — matrix multiplies, fully parallelizable across all positions. <strong>This parallelizability is why Transformers scale and RNNs didn't.</strong></p>
+    <p>The √d_k term keeps the scores small in large dimensions. Large scores would flatten the softmax. Then the gradients would vanish and learning would stop. This is only matrix multiplication. It runs in parallel for all positions. This parallelism is why Transformers scale. RNNs cannot do this.</p>
     <h4>Multi-head attention</h4>
-    <p>One attention head learns one <em>type</em> of relationship (e.g., subject→verb). A layer runs <strong>h heads in parallel</strong> (e.g., 32), each with its own Q/K/V projections, then concatenates. Different heads specialize: syntax, coreference, positional patterns. Think of it as the model attending to many linguistic aspects simultaneously.</p>
-    <h4>Position has to be injected</h4>
-    <p>Attention is permutation-invariant — shuffle the tokens, get the same result. So order is added explicitly via <strong>positional encodings</strong>: original sinusoidal vectors, learned embeddings, and in modern LLMs <strong>RoPE</strong> (Rotary Position Embeddings), which bakes relative position into the Q/K rotations and extrapolates better to long contexts.</p>
+    <p>One attention head learns one type of relation. Example: subject to verb. Multi-head attention runs many heads in parallel. A common number is 32 heads. Each head has its own Q, K, and V. Then the model joins the results.</p>
+    <p>Heads specialize. Some learn grammar. Some learn links between words. Some learn position patterns. The model handles many aspects at the same time.</p>
+    <h4>Position must be added</h4>
+    <p>Attention does not know order. If you shuffle the tokens, the result is the same. So the model adds position information. A positional encoding is a vector. It tells the position of a token in the sequence.</p>
+    <p>Early models used fixed waves or learned vectors. Modern LLMs use RoPE. RoPE means Rotary Position Embeddings. It rotates the Q and K vectors by position. It handles long texts better.</p>
     <h4>The full Transformer block</h4>
 <pre><code>x = x + MultiHeadAttention(LayerNorm(x))   # communicate between positions
 x = x + FeedForward(LayerNorm(x))            # per-position computation (MLP)
 # stacked N times (e.g., 32–96 layers); residual connections (+) let
 # gradients flow through depth — without them, deep nets don't train.</code></pre>
+    <p>The block has two main steps. Here they are as actions:</p>
+    <ol>
+      <li>Normalize the input with LayerNorm. LayerNorm keeps the numbers stable.</li>
+      <li>Run multi-head attention. Add the input back to the output. This is a residual connection. A residual connection adds the input of a layer to its output.</li>
+      <li>Normalize again with LayerNorm.</li>
+      <li>Run the feed-forward network. It works on each position alone. Add the input back.</li>
+      <li>Repeat for all layers. Models use 32 to 96 layers.</li>
+    </ol>
     <ul>
-      <li>The <strong>feed-forward network</strong> (2-layer MLP, often SwiGLU in modern models) holds most of the parameters — it's where "knowledge" largely lives; attention is the routing.</li>
-      <li><strong>Decoder-only</strong> (GPT, Claude, Llama, DeepSeek): causal masking — each token attends only to earlier tokens. This is the LLM standard because it matches the autoregressive objective exactly.</li>
-      <li><strong>Encoder-only</strong> (BERT): bidirectional attention; great for classification/embeddings, can't generate.</li>
-      <li><strong>Encoder-decoder</strong> (T5): reads input bidirectionally, generates output — classic for translation, rarer in frontier LLMs today.</li>
+      <li>The <strong>feed-forward network</strong> holds most parameters. It is a 2-layer MLP. MLP means multi-layer perceptron. It is a small neural network. Modern models often use SwiGLU. SwiGLU is a modern activation function. Most "knowledge" lives here. Attention is the routing.</li>
+      <li><strong>Decoder-only</strong> models (GPT, Claude, Llama, DeepSeek) use causal masking. Causal masking stops a token from seeing later tokens. This matches next-token prediction. This is the standard for LLMs.</li>
+      <li><strong>Encoder-only</strong> models (BERT) read in both directions. They are good for classification and for embeddings. They cannot generate text.</li>
+      <li><strong>Encoder-decoder</strong> models (T5) read the input in both directions. Then they generate the output. They were common for translation. They are rare in new LLMs.</li>
     </ul>
-    <h4>Why behavior differs between models (preview of Module 3)</h4>
-    <p>Same Transformer skeleton, different outcomes — because of <strong>data mix, scale, tokenizer, training objective tweaks, and post-training</strong> (instruction tuning, RLHF). Architecture is ~20% of the story; the rest is what it ate and how it was raised. You'll be able to say this precisely after Modules 2–3.</p>
-    <div class="callout"><strong>The three ideas to keep</strong>1. Attention = differentiable, parallel information routing by learned relevance. 2. Depth + residuals + scale convert that routing into reasoning-like behavior. 3. The decoder-only Transformer trained on next-token prediction <em>is</em> the modern LLM — everything else is scaffolding around it.</div>
+    <h4>Why models behave differently (preview of Module 3)</h4>
+    <p>The Transformer frame is the same. But models act differently. The causes are the data mix, the scale, the tokenizer, small training changes, and post-training. Post-training includes instruction tuning and RLHF.</p>
+    <p>RLHF means reinforcement learning from human feedback. It trains the model to prefer answers that humans rate highly.</p>
+    <p>Architecture is about 20 percent of the story. The rest is the training data and the training method.</p>
+    <div class="callout"><strong>The three ideas to keep</strong>1. Attention routes information in parallel. It uses learned relevance. 2. Many layers with residual connections change this routing into reasoning-like behavior. 3. The decoder-only model trained on next-token prediction is the modern LLM. The rest is support around it.</div>
     <div class="quiz"><h4>Check your understanding</h4>
       <ol>
-        <li>Why couldn't RNNs exploit GPUs the way Transformers can?</li>
-        <li>What breaks if you remove positional encodings? Give a concrete example.</li>
-        <li>Why do frontier LLMs use decoder-only rather than encoder-decoder architectures?</li>
+        <li>Why could RNNs not use GPUs like Transformers can?</li>
+        <li>What breaks if you remove positional encodings? Give one example.</li>
+        <li>Why do new LLMs use decoder-only models and not encoder-decoder models?</li>
       </ol>
-      <details><summary>Hints</summary>1. Sequential dependency: hidden state at t needs t−1, so no parallelization across the sequence; attention computes all pairs at once. 2. "Dog bites man" vs "man bites dog" become identical — attention without position is a bag of tokens. 3. The pretraining objective (next-token prediction) is inherently causal; decoder-only is simpler, scales cleanly, and one model does both understanding and generation.</details>
+      <details><summary>Hints</summary>1. RNNs have a chain of steps. Step t needs step t−1. They cannot run in parallel. Attention computes all pairs at once. 2. "Dog bites man" and "man bites dog" become the same. Attention without position is a bag of tokens. 3. Next-token prediction looks only backward. Decoder-only models match this task. They are simple and they scale. One model understands and generates.</details>
     </div>
   </article>
 
@@ -254,19 +289,626 @@ x = x + FeedForward(LayerNorm(x))            # per-position computation (MLP)
     <p class="lno">Module 1 · Wrap-up</p>
     <h3>What you can now explain</h3>
     <ul>
-      <li>The exact nesting: AI ⊃ ML ⊃ Deep Learning ⊃ Generative AI ⊃ LLMs — and what each layer adds.</li>
-      <li>A language model as <code>P(next token | context)</code>; tokenization; the autoregressive sampling loop; what temperature/top-p actually do.</li>
-      <li>Why attention replaced recurrence; Q/K/V and the attention equation; multi-head; positional encodings; the decoder-only block.</li>
-      <li>Why fluency ≠ truth, and why the same prompt can give different outputs.</li>
+      <li>The nesting: AI holds ML. ML holds deep learning. Deep learning holds generative AI. Generative AI holds LLMs. You know what each level adds.</li>
+      <li>A language model predicts the next token. You know tokenization, the sampling loop, temperature, and top-p.</li>
+      <li>You know why attention replaced recurrence. You know Q, K, and V. You know the attention formula, multi-head attention, positional encodings, and the decoder-only block.</li>
+      <li>You know why fluent text is not always true. You know why one prompt can give many answers.</li>
     </ul>
-    <p><strong>Coming in Module 2:</strong> how these models are <em>trained</em> — pretraining at scale, supervised fine-tuning, RLHF/DPO, data curation, and the scaling laws that predict capability from compute. The site will grow module by module.</p>
+    <p><strong>Coming in Module 2:</strong> how teams train these models. You will learn pretraining at scale. Pretraining teaches the model from large text. You will learn supervised fine-tuning. It trains the model on example questions and answers. You will learn RLHF and DPO. DPO means direct preference optimization. Both align the model with human preference. You will learn data selection and scaling laws. Scaling laws predict skill from compute.</p>
   </article>
+</section>
+
+
+<section class="mod" id="module-2">
+  <div class="mod-head"><span class="mod-num">MODULE 2</span><h2>Training LLMs</h2></div>
+  <p>Module 1 showed how a model generates text. This module shows how engineers build the model. You will follow three stages: pretraining, fine-tuning, and preference training.</p>
+
+  <article class="lesson" id="l21">
+    <p class="lno">Lesson 2.1</p>
+    <h3>Pretraining: From Raw Text to a Base Model</h3>
+    <p>Pretraining teaches a model to predict the next token. A token is a piece of text that the model reads. Engineers train on trillions of tokens.</p>
+    <p>The result is a base model. A base model is a model that predicts likely text. It does not follow instructions yet.</p>
+    <h4>The data pipeline</h4>
+    <p>Good data matters more than clever code. The pipeline has four steps.</p>
+    <ol>
+      <li>Collect text from books, code, and web pages.</li>
+      <li>Remove spam, ads, and broken pages.</li>
+      <li>Remove duplicate text.</li>
+      <li>Convert clean text into tokens.</li>
+    </ol>
+    <p>A web crawl can collect trillions of words. Most of it is low quality. Filters keep only useful text. Duplicate text is harmful because the model learns to repeat it.</p>
+    <h4>The training loop</h4>
+    <p>Training repeats one small loop billions of times. Each pass through the loop is a training step. A training step updates the model once.</p>
+    <p>Each step trains on a batch. A batch is a group of token sequences.</p>
+<pre><code>for step in range(total_steps):
+    batch = get_next_batch(data)      # a group of token sequences
+    guess = model.forward(batch)      # forward pass: predict next tokens
+    loss = measure_error(guess, batch) # loss: a number for the error
+    model.update(loss)                # backpropagation + optimizer step</code></pre>
+    <p>The forward pass makes predictions. The loss measures the error. Loss is a number that measures prediction error.</p>
+    <p>Backpropagation is a method that traces error back to each weight. A weight is a number inside the model.</p>
+    <p>The optimizer then changes each weight by a small amount. An optimizer is a tool that updates weights. Adam is the most common optimizer.</p>
+    <h4>Why training needs thousands of GPUs</h4>
+    <p>A GPU is a chip that does fast math. One GPU is far too slow for pretraining. Engineers split the work across thousands of GPUs.</p>
+    <ul>
+      <li>Data parallelism: each GPU trains on a different batch.</li>
+      <li>Model parallelism: the model itself is split across GPUs.</li>
+    </ul>
+    <p>Training can run for many weeks. The cost can reach tens of millions of dollars. This is why only a few labs train frontier models. A frontier model is a model at the edge of current ability.</p>
+    <div class="callout"><strong>Note:</strong> Pretraining gives knowledge. Later stages shape behavior. Do not expect a base model to act like an assistant.</div>
+    <div class="quiz"><h4>Check your understanding</h4>
+      <ol>
+        <li>Why do engineers remove duplicate text before training?</li>
+        <li>What does the optimizer do in each training step?</li>
+        <li>Why can one GPU not train a frontier model alone?</li>
+      </ol>
+      <details><summary>Hints</summary>1. Duplicates teach repetition. 2. It updates weights to reduce loss. 3. The compute need is too large; work must split across thousands of chips.</details>
+    </div>
+  </article>
+
+  <article class="lesson" id="l22">
+    <p class="lno">Lesson 2.2</p>
+    <h3>Scaling Laws: Predictable Gains From Scale</h3>
+    <p>Scaling laws describe how loss falls with more resources. The pattern is smooth and predictable.</p>
+    <p>In 2020, Kaplan and others found a simple rule. Loss falls in a straight line on a log scale. This holds when you increase compute, data, or parameters. A parameter is a weight that the model learns.</p>
+    <p>You can predict the final loss before training ends. This helps labs plan large training runs.</p>
+    <h4>The Chinchilla correction</h4>
+    <p>In 2022, the Chinchilla study corrected the recipe. Earlier models used too many parameters and too few tokens. The new rule is simple: use about 20 tokens per parameter.</p>
+    <div class="math">tokens &asymp; 20 &times; parameters</div>
+    <table>
+      <tr><th>Model size</th><th>Tokens needed (about)</th></tr>
+      <tr><td>7B parameters</td><td>140B tokens</td></tr>
+      <tr><td>70B parameters</td><td>1.4T tokens</td></tr>
+      <tr><td>400B parameters</td><td>8T tokens</td></tr>
+    </table>
+    <p>For a fixed budget, balance model size and data size. A small model with more data often beats a large model with little data. Overtraining a tiny model also wastes money, so use the rule as a guide.</p>
+    <div class="callout violet"><strong>Note:</strong> Scaling laws predict loss, not usefulness. A lower loss usually means a better model, but you must still test on real tasks.</div>
+    <div class="quiz"><h4>Check your understanding</h4>
+      <ol>
+        <li>A lab plans a 13B model. About how many tokens does the Chinchilla rule suggest?</li>
+        <li>Why do scaling laws help labs plan training budgets?</li>
+        <li>Can a low loss guarantee a useful model? Why or why not?</li>
+      </ol>
+      <details><summary>Hints</summary>1. Multiply 13B by 20 to get about 260B tokens. 2. They predict loss from compute before spending money. 3. No; loss measures prediction error, not task success.</details>
+    </div>
+  </article>
+
+  <article class="lesson" id="l23">
+    <p class="lno">Lesson 2.3</p>
+    <h3>Supervised Fine-Tuning: From Predictor to Assistant</h3>
+    <p>A base model predicts likely text. It does not follow instructions. Supervised fine-tuning (SFT) changes that. SFT trains the model on chosen examples.</p>
+    <p>Each example pairs an instruction with a good response. Instruction tuning is SFT with instruction examples. The dataset is small: thousands of examples, not trillions.</p>
+    <h4>Why a little good data changes so much</h4>
+    <p>The model already knows facts from pretraining. SFT teaches style and behavior. It learns to answer directly. It learns to refuse unsafe requests. It learns a helpful tone.</p>
+    <p>Quality beats size here. A few thousand excellent examples can shift behavior strongly. Poor examples teach poor habits.</p>
+    <h4>The SFT procedure</h4>
+    <ol>
+      <li>Collect instruction and response pairs.</li>
+      <li>Check each pair for quality.</li>
+      <li>Train the base model on the pairs with a small learning rate.</li>
+      <li>Test the model on new instructions.</li>
+    </ol>
+    <p>Engineers use a small learning rate. A learning rate is the size of each weight update. Small updates protect the knowledge from pretraining.</p>
+    <div class="callout amber"><strong>Note:</strong> SFT adds little new knowledge. New facts come from pretraining. SFT mainly changes how the model uses what it knows.</div>
+    <div class="quiz"><h4>Check your understanding</h4>
+      <ol>
+        <li>What is the input and output of one SFT example?</li>
+        <li>Why does SFT use far less data than pretraining?</li>
+        <li>A model gives rude answers after SFT. What likely went wrong?</li>
+      </ol>
+      <details><summary>Hints</summary>1. The input is an instruction; the target is a good response. 2. It shapes behavior, not knowledge. 3. The example data likely had poor quality or poor tone.</details>
+    </div>
+  </article>
+
+  <article class="lesson" id="l24">
+    <p class="lno">Lesson 2.4</p>
+    <h3>RLHF, RLAIF, and DPO: Learning From Preferences</h3>
+    <p>SFT teaches the format of a good answer. It does not teach which answer humans prefer. Preference training fills this gap.</p>
+    <h4>RLHF in four steps</h4>
+    <p>RLHF means reinforcement learning from human feedback. The method has four steps.</p>
+    <ol>
+      <li>Show humans two answers to one prompt.</li>
+      <li>Record which answer each human prefers.</li>
+      <li>Train a reward model on these choices.</li>
+      <li>Update the language model to earn high reward scores.</li>
+    </ol>
+    <p>A reward model is a model that scores answer quality. PPO then updates the language model in small safe steps. PPO is an algorithm that limits each update size.</p>
+    <h4>RLAIF: AI judges instead of humans</h4>
+    <p>RLAIF means reinforcement learning from AI feedback. A strong AI model ranks the answers instead of humans. AI judges cost less and work faster. Human judges still give better quality for hard cases.</p>
+    <h4>DPO: a simpler path</h4>
+    <p>DPO means direct preference optimization. DPO trains directly on human choices. It needs no reward model. It needs no PPO. This makes DPO simple and stable. Many open models use DPO.</p>
+    <div class="callout"><strong>Note:</strong> RLHF can make models too agreeable. A model may please the user instead of giving a true answer. Sycophancy means excessive agreement.</div>
+    <div class="quiz"><h4>Check your understanding</h4>
+      <ol>
+        <li>What data does a reward model learn from?</li>
+        <li>How does RLAIF differ from RLHF?</li>
+        <li>Why might a team choose DPO over RLHF?</li>
+      </ol>
+      <details><summary>Hints</summary>1. Human rankings of answer pairs. 2. An AI judge replaces human judges. 3. DPO is simpler; it skips the reward model and PPO.</details>
+    </div>
+  </article>
+
+  <article class="lesson" id="l2wrap">
+    <p class="lno">Module 2 · Wrap-up</p>
+    <h3>What you can now explain</h3>
+    <ul>
+      <li>How raw text becomes a base model: collect, filter, deduplicate, tokenize, then loop forward pass, loss, backpropagation, and optimizer step.</li>
+      <li>Why pretraining needs thousands of GPUs and costs tens of millions of dollars.</li>
+      <li>The Chinchilla rule: about 20 tokens per parameter, and how to use it for budgets.</li>
+      <li>How SFT turns a predictor into an assistant with a few thousand good examples.</li>
+      <li>How RLHF, RLAIF, and DPO use preferences to shape model behavior.</li>
+    </ul>
+    <p><strong>Coming in Module 3:</strong> why GPT, Claude, Gemini, and DeepSeek feel different even though they share the same Transformer core.</p>
+  </article>
+</section>
+
+<section class="mod" id="module-3">
+  <div class="mod-head"><span class="mod-num">MODULE 3</span><h2>Why Models Behave Differently</h2></div>
+  <p>GPT, Claude, Gemini, and DeepSeek all use Transformers. Yet they feel different. This module shows why. You will see architecture choices, data choices, and tuning choices.</p>
+
+  <article class="lesson" id="l31">
+    <p class="lno">Lesson 3.1</p>
+    <h3>Architecture Choices: Dense, MoE, GQA, and MLA</h3>
+    <p>Most models share the decoder-only Transformer from Module 1. Labs then change parts of it. Each change balances cost, speed, and quality.</p>
+    <h4>Dense vs mixture of experts</h4>
+    <p>A dense model uses all its weights for every token. MoE means mixture of experts. An MoE model holds many small networks called experts. A router sends each token to a few experts. A router is a small network that picks experts.</p>
+    <p>Only the chosen experts do work. The model gains large capacity at low cost per token. DeepSeek uses MoE in its large models. Training a router is harder than training a dense model.</p>
+    <h4>GQA: cheaper attention memory</h4>
+    <p>GQA means grouped-query attention. Normal attention gives each head its own keys and values. GQA shares keys and values across groups of heads. This shrinks the KV cache. The KV cache stores keys and values of past tokens. A smaller cache allows longer context and faster generation.</p>
+    <h4>MLA: compressed attention memory</h4>
+    <p>MLA means multi-head latent attention. Latent means hidden and compressed. MLA compresses keys and values into one small vector per token. The model rebuilds what it needs during attention. DeepSeek introduced MLA in its V2 model. It also targets a smaller KV cache.</p>
+    <table>
+      <tr><th>Technique</th><th>What it changes</th><th>Main effect</th></tr>
+      <tr><td>Dense</td><td>Uses all weights per token</td><td>Simple; high cost at large size</td></tr>
+      <tr><td>MoE</td><td>Router picks a few experts per token</td><td>Large capacity; lower cost per token</td></tr>
+      <tr><td>GQA</td><td>Heads share keys and values</td><td>Smaller KV cache; faster generation</td></tr>
+      <tr><td>MLA</td><td>Keys and values are compressed</td><td>Smaller KV cache; longer context</td></tr>
+    </table>
+    <div class="callout"><strong>Note:</strong> Architecture is only part of the story. Data and post-training often matter more than these tricks.</div>
+    <div class="quiz"><h4>Check your understanding</h4>
+      <ol>
+        <li>In an MoE model, what does the router do?</li>
+        <li>Why does a smaller KV cache help generation?</li>
+        <li>How do GQA and MLA reach a similar goal?</li>
+      </ol>
+      <details><summary>Hints</summary>1. It picks a few experts for each token. 2. It saves memory and speeds up each step. 3. Both shrink the keys and values that the model stores.</details>
+    </div>
+  </article>
+
+  <article class="lesson" id="l32">
+    <p class="lno">Lesson 3.2</p>
+    <h3>Data Mix and Post-Training Recipes</h3>
+    <p>Labs train on different data mixes. A data mix is the blend of text types in training. The mix shapes skills directly.</p>
+    <ul>
+      <li>More code data improves coding skill.</li>
+      <li>More math data improves math skill.</li>
+      <li>More dialogue data improves chat skill.</li>
+    </ul>
+    <p>Post-training recipes also differ per lab. One lab may favor short answers. Another lab may favor long explanations. One lab may tune for safe refusals. Another may tune for maximum helpfulness.</p>
+    <h4>System prompts shape personality</h4>
+    <p>A system prompt is a hidden instruction from the lab. It sets tone, rules, and limits. It can set the knowledge cutoff date. The knowledge cutoff is the date of the newest training data. You never see this prompt, but you feel its effects.</p>
+    <div class="callout violet"><strong>Note:</strong> Two models can share an architecture and still feel different. Data mix, tuning recipe, and system prompt explain most of the gap.</div>
+    <div class="quiz"><h4>Check your understanding</h4>
+      <ol>
+        <li>A model is weak at math but strong at chat. What does this say about its data?</li>
+        <li>What does a system prompt control?</li>
+        <li>Why do two labs get different personalities from the same architecture?</li>
+      </ol>
+      <details><summary>Hints</summary>1. Little math data and much dialogue data. 2. Tone, rules, limits, and the knowledge cutoff date. 3. Different data mixes, tuning recipes, and system prompts.</details>
+    </div>
+  </article>
+
+  <article class="lesson" id="l33">
+    <p class="lno">Lesson 3.3</p>
+    <h3>How to Compare Models in Practice</h3>
+    <p>Public scores help, but they can mislead. A benchmark is a fixed test with scores. Models can see benchmark data during training. This inflates scores without real skill gain.</p>
+    <h4>What actually drives the differences you feel</h4>
+    <p>Tool use means the model can call external tools.</p>
+    <ul>
+      <li>Knowledge cutoff: fresh facts need fresh data.</li>
+      <li>Context length: long documents need long context.</li>
+      <li>Reasoning effort: hard tasks need more thinking tokens.</li>
+      <li>Tool use: agents need to call search, code, and APIs.</li>
+      <li>Cost and speed: production needs both.</li>
+    </ul>
+    <h4>A simple comparison procedure</h4>
+    <ol>
+      <li>List your real tasks.</li>
+      <li>Build a small test set from real examples.</li>
+      <li>Run each model with temperature 0.</li>
+      <li>Score the answers yourself.</li>
+      <li>Compare quality, cost, and speed together.</li>
+    </ol>
+    <p>Your own test beats any public leaderboard. It measures what you actually need.</p>
+    <div class="callout amber"><strong>Note:</strong> Do not pick the biggest model by default. A smaller, cheaper model often wins on your task. Test before you commit.</div>
+    <div class="quiz"><h4>Check your understanding</h4>
+      <ol>
+        <li>Why can benchmark scores mislead you?</li>
+        <li>Name three things to check besides quality when you compare models.</li>
+        <li>Why run each model with temperature 0 during comparison?</li>
+      </ol>
+      <details><summary>Hints</summary>1. Models may train on the test data. 2. Cost, speed, and context length, for example. 3. It removes random noise from sampling.</details>
+    </div>
+  </article>
+
+  <article class="lesson" id="l3wrap">
+    <p class="lno">Module 3 · Wrap-up</p>
+    <h3>What you can now explain</h3>
+    <ul>
+      <li>How MoE, GQA, and MLA change cost, speed, and memory use.</li>
+      <li>Why data mix, tuning recipe, and system prompt shape model personality.</li>
+      <li>Why the same Transformer skeleton gives different results in different labs.</li>
+      <li>How to compare models on your own tasks with a simple test procedure.</li>
+    </ul>
+    <p><strong>Coming in Module 4:</strong> how to choose a model with evals, and how to trade cost, speed, and quality.</p>
+  </article>
+</section>
+
+<section class="mod" id="module-4">
+<div class="mod-head"><span class="mod-num">MODULE 4</span><h2>Choosing a Model</h2></div>
+<p>This module teaches you how to choose a model for your task. You will learn what benchmarks can and cannot tell you. You will learn how to test models on your own real work. You will learn how to balance cost, speed, and quality.</p>
+
+<article class="lesson" id="l41">
+<p class="lno">Lesson 4.1</p><h3>Benchmarks and their limits</h3>
+<p>A benchmark is a standard test. It measures one skill of a model.</p>
+<h4>Tests you will see</h4>
+<ul>
+<li><strong>MMLU</strong> tests school knowledge. It uses multiple-choice questions. It covers subjects like math, history, and law.</li>
+<li><strong>HumanEval</strong> tests code writing. The model reads an English description. It then writes a short program.</li>
+<li>Other tests measure math word problems, logical reasoning, or chat quality.</li>
+</ul>
+<h4>Why a high score can mislead you</h4>
+<p>Your task is not the test. Real inputs are messy and unclear. Test questions are clean and short. A model can win the test and still fail your task.</p>
+<ul>
+<li>The test style differs from your work.</li>
+<li>Your users write unclear prompts.</li>
+<li>Your data has private terms the test never saw.</li>
+</ul>
+<table>
+<tr><th>Benchmark</th><th>What it measures</th><th>Its limit</th></tr>
+<tr><td>MMLU</td><td>School knowledge, multiple choice</td><td>Real tasks are not multiple choice</td></tr>
+<tr><td>HumanEval</td><td>Short code from descriptions</td><td>Real code needs large context</td></tr>
+<tr><td>Chat tests</td><td>Human preference votes</td><td>Votes favor long, confident answers</td></tr>
+</table>
+<h4>Contamination and gaming</h4>
+<p>Contamination means the test questions were in the training data. The model then repeats memorized answers. The score looks high. The true skill is lower.</p>
+<p>Gaming means training for the test itself. Builders tune prompts and data for one benchmark. The score rises. Real quality does not rise.</p>
+<div class="callout"><strong>Note:</strong> A high score proves skill on that test only. Test the model on your own task before you decide.</div>
+<div class="quiz"><h4>Check your understanding</h4>
+<ol>
+<li>Name two ways a benchmark score can mislead you.</li>
+<li>What is contamination, in your own words?</li>
+<li>Why do chat test votes favor long answers?</li>
+</ol>
+<details><summary>Hints</summary>1. Test style differs from real work; contamination and gaming raise scores without real gains. 2. Test questions were in the training data, so the model remembers them. 3. Voters often reward confident, detailed style over correct, short answers.</details>
+</div>
+</article>
+
+<article class="lesson" id="l42">
+<p class="lno">Lesson 4.2</p><h3>Evaluate on your own workload</h3>
+<p>An eval set is a small group of real examples from your work. Each example has an input and the correct answer.</p>
+<h4>Build the eval set in six steps</h4>
+<ol>
+<li>Collect 50 to 200 real inputs from your users.</li>
+<li>Write the correct answer for each input.</li>
+<li>Run every candidate model on the same inputs.</li>
+<li>Score each answer as correct or wrong.</li>
+<li>Measure speed and cost for each model.</li>
+<li>Choose the model with the best balance for you.</li>
+</ol>
+<h4>What to measure</h4>
+<table>
+<tr><th>Metric</th><th>Meaning</th><th>How to measure</th></tr>
+<tr><td>Quality</td><td>Share of correct answers</td><td>Correct answers divided by total answers</td></tr>
+<tr><td>Latency</td><td>Time per answer</td><td>Seconds from request to full answer</td></tr>
+<tr><td>Cost</td><td>Money per task</td><td>Tokens used times price per token</td></tr>
+</table>
+<div class="math">quality = correct answers / total answers<br/>cost per 1,000 tasks = tokens per task x price per token x 1,000</div>
+<h4>Human review or LLM-as-judge</h4>
+<p>An LLM-as-judge is a strong model that grades answers. Human review is slow. It is the most trusted method. Use it for final decisions. LLM-as-judge is fast. It can favor answers in its own style. Use it for quick first checks.</p>
+<div class="callout violet"><strong>Note:</strong> Test all models with temperature 0. This removes random change. Your comparison stays fair.</div>
+<div class="quiz"><h4>Check your understanding</h4>
+<ol>
+<li>Why must every model see the same inputs?</li>
+<li>When do you use human review instead of LLM-as-judge?</li>
+<li>Write the formula for quality.</li>
+</ol>
+<details><summary>Hints</summary>1. Same inputs make the test fair; different inputs would change the result. 2. For final decisions, where trust matters most. 3. Correct answers divided by total answers.</details>
+</div>
+</article>
+
+<article class="lesson" id="l43">
+<p class="lno">Lesson 4.3</p><h3>Cost, latency, and quality trade-offs</h3>
+<p>You cannot have the best of all three. You must choose your balance.</p>
+<h4>Token prices</h4>
+<p>You pay for each token you send. You pay for each token the model writes. Output tokens usually cost more than input tokens. Long answers cost more than short answers.</p>
+<h4>Speed</h4>
+<p>Speed means tokens per second. Small models usually write faster than large models. First-token delay also matters for chat.</p>
+<h4>When a small model wins</h4>
+<ul>
+<li>The task is simple, for example text labels or short summaries.</li>
+<li>You run millions of tasks and cost matters.</li>
+<li>Users need answers in under one second.</li>
+</ul>
+<h4>When you need a frontier model</h4>
+<p>A frontier model is the strongest public model of its time.</p>
+<ul>
+<li>The task needs hard reasoning or long documents.</li>
+<li>A wrong answer costs you money or trust.</li>
+<li>The task needs rare knowledge the small model lacks.</li>
+</ul>
+<table>
+<tr><th>Your need</th><th>Best choice</th></tr>
+<tr><td>Simple repeated tasks</td><td>Small model</td></tr>
+<tr><td>Hard reasoning</td><td>Frontier model</td></tr>
+<tr><td>Tight budget</td><td>Small model</td></tr>
+<tr><td>High cost of error</td><td>Frontier model</td></tr>
+</table>
+<div class="callout amber"><strong>Note:</strong> Start with a small model. Move to a larger model only when your tests prove you need it.</div>
+<div class="quiz"><h4>Check your understanding</h4>
+<ol>
+<li>Why do output tokens usually cost more than input tokens?</li>
+<li>Give one case where a small model is the best choice.</li>
+<li>What is a frontier model?</li>
+</ol>
+<details><summary>Hints</summary>1. Providers usually price output tokens higher because writing takes more compute. 2. For example, simple classification at high volume. 3. The strongest public model of its time.</details>
+</div>
+</article>
+
+<article class="lesson" id="l4wrap">
+<p class="lno">Module 4 · Wrap-up</p><h3>What you can now do</h3>
+<ul>
+<li>Explain the limits of benchmarks like MMLU and HumanEval.</li>
+<li>Build an eval set from your real inputs in six steps.</li>
+<li>Measure quality, latency, and cost for each model.</li>
+<li>Choose the right balance of cost, speed, and quality.</li>
+</ul>
+<p>Next: Module 5 shows you how to improve results with prompts, RAG, tools, and faster inference.</p>
+</article>
+</section>
+
+<section class="mod" id="module-5">
+<div class="mod-head"><span class="mod-num">MODULE 5</span><h2>Optimizing for Real Applications</h2></div>
+<p>This module teaches you how to improve results in real applications. You will learn prompt design and RAG. You will learn tools, agents, and fine-tuning. You will learn how to make inference cheaper and faster.</p>
+
+<article class="lesson" id="l51">
+<p class="lno">Lesson 5.1</p><h3>Prompt design and RAG</h3>
+<p>A prompt is the text you send to the model. Good prompts act like programs. They control what the model does.</p>
+<h4>Three parts of a strong prompt</h4>
+<ol>
+<li><strong>Role.</strong> A role tells the model its job. Example: "You are a bank support agent. Answer in short, polite sentences."</li>
+<li><strong>Instructions.</strong> Instructions are clear steps. Write them as a short numbered list. Put the most important rule first.</li>
+<li><strong>Examples.</strong> Examples show input and output pairs. Two or three examples are usually enough. This is called few-shot prompting.</li>
+</ol>
+<h4>RAG in seven steps</h4>
+<p>RAG means retrieval-augmented generation. The model reads parts of your documents before it answers.</p>
+<p>An embedding is a list of numbers. It shows the meaning of a text. Texts with close meanings have close numbers. A vector store is a database for embeddings.</p>
+<ol>
+<li>Split your documents into small chunks of 300 to 800 tokens.</li>
+<li>Convert each chunk into an embedding.</li>
+<li>Store all embeddings in a vector store.</li>
+<li>Convert the user question into an embedding.</li>
+<li>Find the chunks with the closest meaning.</li>
+<li>Add the top chunks to the prompt.</li>
+<li>Send the prompt to the model.</li>
+</ol>
+<pre><code>chunks = split(documents)
+store.add(embed(chunks))
+top = store.search(embed(question), k=5)
+answer = model(prompt + top)</code></pre>
+<h4>When RAG helps and when it does not</h4>
+<table>
+<tr><th>Situation</th><th>Use RAG?</th></tr>
+<tr><td>Answers need private company data</td><td>Yes</td></tr>
+<tr><td>Facts change often</td><td>Yes</td></tr>
+<tr><td>You must cite sources</td><td>Yes</td></tr>
+<tr><td>The model already knows the facts</td><td>No</td></tr>
+<tr><td>The task needs pure reasoning</td><td>No</td></tr>
+<tr><td>Simple open chat</td><td>No</td></tr>
+</table>
+<div class="callout"><strong>Note:</strong> RAG grounds the model in your data. It does not fix weak reasoning. Choose a strong model for hard reasoning.</div>
+<div class="quiz"><h4>Check your understanding</h4>
+<ol>
+<li>List the three parts of a strong prompt.</li>
+<li>What does the vector store hold?</li>
+<li>Name one case where RAG does not help.</li>
+</ol>
+<details><summary>Hints</summary>1. Role, instructions, examples. 2. Embeddings of your document chunks. 3. For example, pure reasoning tasks or simple open chat.</details>
+</div>
+</article>
+
+<article class="lesson" id="l52">
+<p class="lno">Lesson 5.2</p><h3>Tools, agents, and fine-tuning</h3>
+<h4>Tool use in six steps</h4>
+<p>A tool is your code that the model can call. Function calling is the name for this skill.</p>
+<ol>
+<li>Describe each tool: its name and its inputs.</li>
+<li>The model reads the user request.</li>
+<li>The model chooses a tool and gives input values.</li>
+<li>Your code runs the tool.</li>
+<li>You send the tool result back to the model.</li>
+<li>The model writes the final answer.</li>
+</ol>
+<h4>Agents</h4>
+<p>An agent is a model that works in a loop. It plans, acts with tools, and observes results. It repeats these steps until the task is done.</p>
+<pre><code>while task not done:
+    plan = model.think(state)
+    result = tools.run(plan.action)
+    state.update(result)</code></pre>
+<h4>Fine-tuning vs RAG</h4>
+<p>Fine-tuning is extra training on your examples. It changes the model weights.</p>
+<table>
+<tr><th>Your need</th><th>Best choice</th></tr>
+<tr><td>The model must know new facts</td><td>RAG</td></tr>
+<tr><td>Answers must follow your style</td><td>Fine-tuning</td></tr>
+<tr><td>You must show sources</td><td>RAG</td></tr>
+<tr><td>You have thousands of example pairs</td><td>Fine-tuning</td></tr>
+<tr><td>Your budget is small</td><td>RAG</td></tr>
+<tr><td>You need both facts and style</td><td>Use both</td></tr>
+</table>
+<div class="callout violet"><strong>Note:</strong> Use RAG for knowledge. Use fine-tuning for behavior. Many strong systems use both together.</div>
+<div class="quiz"><h4>Check your understanding</h4>
+<ol>
+<li>What happens in step 4 of tool use?</li>
+<li>How is an agent different from one model call?</li>
+<li>When is fine-tuning the wrong choice?</li>
+</ol>
+<details><summary>Hints</summary>1. Your code runs the tool the model chose. 2. An agent loops: plan, act, observe, repeat. 3. When you need new facts or sources — use RAG instead.</details>
+</div>
+</article>
+
+<article class="lesson" id="l53">
+<p class="lno">Lesson 5.3</p><h3>Inference optimization</h3>
+<p>Inference is the act of running the model to make answers.</p>
+<h4>Quantization</h4>
+<p>Quantization stores each weight with fewer bits. Fewer bits mean less memory.</p>
+<table>
+<tr><th>Format</th><th>Bits per weight</th><th>Memory vs FP32</th><th>Quality</th></tr>
+<tr><td>FP32</td><td>32</td><td>Full</td><td>Best</td></tr>
+<tr><td>FP16</td><td>16</td><td>Half</td><td>Almost best</td></tr>
+<tr><td>INT8</td><td>8</td><td>Quarter</td><td>Small loss</td></tr>
+<tr><td>INT4</td><td>4</td><td>Eighth</td><td>Clear loss on hard tasks</td></tr>
+</table>
+<p>Most teams use FP16 or INT8 for good balance.</p>
+<h4>KV-cache</h4>
+<p>The KV-cache stores past attention values. The model reuses them for each new token. This makes long answers much faster. It uses extra memory.</p>
+<h4>Speculative decoding</h4>
+<p>A small model writes a draft answer. The large model checks the draft. Correct parts stay. Wrong parts get fixed. This is faster than the large model alone.</p>
+<table>
+<tr><th>Method</th><th>What it saves</th><th>What it costs</th></tr>
+<tr><td>Quantization</td><td>Memory</td><td>Some quality</td></tr>
+<tr><td>KV-cache</td><td>Time</td><td>Memory</td></tr>
+<tr><td>Speculative decoding</td><td>Time</td><td>An extra small model</td></tr>
+</table>
+<div class="callout"><strong>Note:</strong> Measure quality after each change. Speed means nothing if answers get worse.</div>
+<div class="quiz"><h4>Check your understanding</h4>
+<ol>
+<li>How much memory does INT8 save compared with FP32?</li>
+<li>What does the KV-cache store?</li>
+<li>Why is speculative decoding faster?</li>
+</ol>
+<details><summary>Hints</summary>1. About three quarters — INT8 uses one quarter of the memory. 2. Past attention values, reused for each new token. 3. The small model drafts fast; the large model only checks.</details>
+</div>
+</article>
+
+<article class="lesson" id="l5wrap">
+<p class="lno">Module 5 · Wrap-up</p><h3>What you can now do</h3>
+<ul>
+<li>Write prompts with role, instructions, and examples.</li>
+<li>Build RAG in seven steps: split, embed, store, retrieve, add, send.</li>
+<li>Give a model tools, and explain how agents loop.</li>
+<li>Choose between RAG and fine-tuning with a decision table.</li>
+<li>Save memory and time with quantization, KV-cache, and speculative decoding.</li>
+</ul>
+<p>Next: Module 6 compares open and closed models and shows how to deploy them.</p>
+</article>
+</section>
+
+<section class="mod" id="module-6">
+<div class="mod-head"><span class="mod-num">MODULE 6</span><h2>Open vs Closed and Deployment</h2></div>
+<p>This module compares open and closed models. You will learn what "open" really means. You will learn how to run models yourself. You will learn how to choose between build and buy.</p>
+
+<article class="lesson" id="l61">
+<p class="lno">Lesson 6.1</p><h3>Open weights vs API models</h3>
+<p>Open weights means you can download the model files. You run them on your own computers. An API model runs on the provider's computers. You send requests over the internet.</p>
+<p>Open-weight examples are Llama, DeepSeek, and Mistral. API examples are GPT, Claude, and Gemini.</p>
+<h4>Licenses</h4>
+<p>The license tells you what you may do. Some licenses are fully open. Some licenses limit commercial use. Read the license before you use the model.</p>
+<table>
+<tr><th>Topic</th><th>Open weights</th><th>API model</th></tr>
+<tr><td>Control</td><td>Full</td><td>Limited</td></tr>
+<tr><td>Privacy</td><td>Data stays with you</td><td>Data goes to the provider</td></tr>
+<tr><td>Cost</td><td>Hardware plus skill</td><td>Pay per token</td></tr>
+<tr><td>Updates</td><td>You update</td><td>The provider updates</td></tr>
+<tr><td>Skill needed</td><td>High</td><td>Low</td></tr>
+</table>
+<div class="callout"><strong>Note:</strong> "Open" does not always mean fully free. The license decides what you may do.</div>
+<div class="quiz"><h4>Check your understanding</h4>
+<ol>
+<li>What is the difference between open weights and an API model?</li>
+<li>Why must you read the license?</li>
+<li>Name one privacy gain of open weights.</li>
+</ol>
+<details><summary>Hints</summary>1. Open weights run on your computers; API models run on the provider's. 2. Some licenses limit commercial use. 3. Your data never leaves your computers.</details>
+</div>
+</article>
+
+<article class="lesson" id="l62">
+<p class="lno">Lesson 6.2</p><h3>Run models yourself</h3>
+<p>VRAM is memory on the graphics card. Model weights live in VRAM during use.</p>
+<div class="math">memory = parameters x bytes per parameter</div>
+<p>For example, a widely used 8-billion-parameter model in INT4 needs about 4 to 5 GB.</p>
+<h4>Formats</h4>
+<ul>
+<li><strong>GGUF</strong> is a format for CPU use.</li>
+<li><strong>AWQ</strong> and <strong>GPTQ</strong> are formats for GPU use.</li>
+<li>All three shrink the model with quantization.</li>
+</ul>
+<h4>Tools</h4>
+<ul>
+<li><strong>Ollama</strong> runs models on your laptop with one command. It is the simplest start.</li>
+<li><strong>vLLM</strong> serves many users at high speed. Use it for production APIs.</li>
+</ul>
+<h4>Five steps to your first local run</h4>
+<ol>
+<li>Choose a model and a format for your hardware.</li>
+<li>Check VRAM with the math above.</li>
+<li>Install Ollama or vLLM.</li>
+<li>Download the model files.</li>
+<li>Test with a simple prompt.</li>
+</ol>
+<div class="callout violet"><strong>Note:</strong> Start on CPU with a small GGUF model. Move to GPU only when you need more speed.</div>
+<div class="quiz"><h4>Check your understanding</h4>
+<ol>
+<li>How do you estimate VRAM for a model?</li>
+<li>When do you choose GGUF over AWQ?</li>
+<li>Which tool is simplest for a laptop?</li>
+</ol>
+<details><summary>Hints</summary>1. Multiply parameters by bytes per parameter. 2. GGUF for CPU; AWQ for GPU. 3. Ollama.</details>
+</div>
+</article>
+
+<article class="lesson" id="l63">
+<p class="lno">Lesson 6.3</p><h3>The build-vs-buy decision</h3>
+<p>Build means you self-host open weights. Buy means you pay for an API.</p>
+<table>
+<tr><th>Factor</th><th>Build fits when</th><th>Buy fits when</th></tr>
+<tr><td>Team skill</td><td>You have ML engineers</td><td>You have app developers only</td></tr>
+<tr><td>Data privacy</td><td>Strict rules forbid outside data flow</td><td>Normal rules allow it</td></tr>
+<tr><td>Scale</td><td>Very high volume, steady load</td><td>Varied or low volume</td></tr>
+<tr><td>Latency needs</td><td>You control the servers</td><td>Provider speed is enough</td></tr>
+<tr><td>Cost shape</td><td>Fixed hardware cost is fine</td><td>You prefer pay per token</td></tr>
+</table>
+<h4>License limits</h4>
+<p>Some licenses forbid training rival models on outputs. Some require you to show the model name. Check these rules with your legal team.</p>
+<div class="callout amber"><strong>Note:</strong> Most teams start with buy. They move to build when volume or privacy demands it.</div>
+<div class="quiz"><h4>Check your understanding</h4>
+<ol>
+<li>Your data may not leave your country. Build or buy?</li>
+<li>Name two factors in the decision table.</li>
+<li>Why do most teams start with buy?</li>
+</ol>
+<details><summary>Hints</summary>1. Build — self-host open weights. 2. For example, team skill and data privacy. 3. It is faster to start and needs less skill.</details>
+</div>
+</article>
+
+<article class="lesson" id="l6wrap">
+<p class="lno">Module 6 · Wrap-up</p><h3>What you can now do</h3>
+<ul>
+<li>Explain what open weights really mean, including license limits.</li>
+<li>Estimate VRAM and choose a format and tool for local runs.</li>
+<li>Decide between build and buy with a clear table.</li>
+</ul>
+<h4>Course conclusion</h4>
+<p>You now hold the full picture. Module 1 gave you the core ideas: tokens, attention, and generation. Module 2 showed how models learn. Module 3 showed why models differ. Module 4 taught you how to choose. Module 5 taught you how to improve. Module 6 taught you how to deploy.</p>
+<p>Keep building. Test everything on your own data. The field moves fast, but these ideas will stay useful.</p>
+</article>
 </section>
 
 <!-- ==================== ROADMAP ==================== -->
 <section class="mod" id="roadmap">
   <div class="mod-head"><span class="mod-num">ROADMAP</span><h2>Modules 2 – 6</h2></div>
-  <p>The course builds in order. Each module will be published here as it's written.</p>
+  <p>The course builds in order. All six modules are published above — this map shows the full course.</p>
   <div class="roadmap">
     <div class="rm-card">
       <h3>Module 2 — Training LLMs</h3>
@@ -296,7 +938,7 @@ x = x + FeedForward(LayerNorm(x))            # per-position computation (MLP)
 </section>
 
 <footer>
-  <p><strong>LLM Deep Dive</strong> — a structured engineering course. Module 1 published October 2026. Built as a static site; new modules appear here as they're written.</p>
+  <p><strong>LLM Deep Dive</strong> — a structured engineering course. Modules 1–6 published October 2026, written in Simplified Technical English (ASD-STE100): short sentences, one idea per sentence, plain words. Built as a static site; new modules appear here as they're written.</p>
   <p>Key reference: Vaswani et al., <em>Attention Is All You Need</em> (2017). Concepts verified against standard treatments; math notation follows the original paper.</p>
 </footer>
 
