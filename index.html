@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light dark" />
+<title>LLM Deep Dive — From First Principles to Real-World Systems</title>
+<meta name="description" content="A structured engineering course on how modern LLMs work internally: fundamentals, transformers, training, behavior, selection and optimization." />
+<style>
+:root{
+  --paper:#f7f5f0; --surface:#fffdf8; --ink:#14231f; --muted:#5a6660;
+  --line:#d8d2c4; --accent:#0f766e; --accent-soft:#d7efe9;
+  --violet:#6d28d9; --violet-soft:#e9e2fb;
+  --amber:#b45309; --amber-soft:#f7e7c8;
+  --code:#12211d; --code-ink:#e8f4ee;
+  --radius:14px; --shadow:0 12px 30px rgba(20,35,31,.08);
+}
+@media (prefers-color-scheme:dark){
+  :root{--paper:#0f1614; --surface:#16211d; --ink:#e9f2ec; --muted:#a9bab2;
+  --line:#2c3d36; --accent:#2dd4bf; --accent-soft:#123c36;
+  --violet:#a78bfa; --violet-soft:#241a3f; --amber:#fbbf24; --amber-soft:#3a2c12;
+  --code:#0a100d; --code-ink:#e8f4ee; --shadow:0 16px 40px rgba(0,0,0,.28);}
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);
+  font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.65}
+.page{max-width:960px;margin:0 auto;padding:0 clamp(18px,4vw,40px) 90px}
+.hero{padding:clamp(40px,7vw,90px) 0 34px;border-bottom:1px solid var(--line)}
+.kicker{font-family:ui-monospace,Menlo,monospace;color:var(--accent);font-size:.8rem;
+  font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin:0 0 16px}
+h1{font-size:clamp(2.4rem,6vw,4.4rem);line-height:1.04;letter-spacing:-.03em;margin:0 0 18px}
+h1 .em{color:var(--accent)}
+.hero p.lede{font-size:1.12rem;color:var(--muted);max-width:640px;margin:0 0 26px}
+.badges{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px}
+.badge{font-size:.78rem;font-weight:600;border:1px solid var(--line);background:var(--surface);
+  padding:6px 12px;border-radius:999px;color:var(--muted)}
+.cta-row{display:flex;gap:12px;flex-wrap:wrap}
+.btn{display:inline-block;text-decoration:none;font-weight:700;font-size:.95rem;
+  padding:12px 22px;border-radius:10px;border:1px solid var(--ink)}
+.btn.primary{background:var(--ink);color:var(--paper)}
+.btn.ghost{background:transparent;color:var(--ink)}
+nav.toc{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px 24px;margin:30px 0;box-shadow:var(--shadow)}
+nav.toc h2{font-size:1rem;margin:0 0 10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+nav.toc ol{margin:0;padding-left:20px;display:grid;gap:8px}
+nav.toc a{color:var(--ink);text-decoration:none;font-weight:600}
+nav.toc a:hover{color:var(--accent)}
+nav.toc .soon{font-size:.75rem;color:var(--muted);font-weight:400;border:1px solid var(--line);
+  border-radius:999px;padding:2px 9px;margin-left:8px;white-space:nowrap}
+section.mod{margin:54px 0;scroll-margin-top:20px}
+.mod-head{display:flex;align-items:baseline;gap:14px;border-bottom:2px solid var(--ink);
+  padding-bottom:10px;margin-bottom:26px;flex-wrap:wrap}
+.mod-num{font-family:ui-monospace,Menlo,monospace;background:var(--ink);color:var(--paper);
+  font-weight:700;font-size:.85rem;padding:5px 12px;border-radius:8px}
+.mod-head h2{font-size:clamp(1.6rem,3.4vw,2.4rem);letter-spacing:-.02em;margin:0}
+.lesson{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  padding:clamp(20px,3vw,34px);margin:0 0 22px;box-shadow:var(--shadow)}
+.lesson h3{font-size:1.35rem;margin:0 0 6px;letter-spacing:-.01em}
+.lesson .lno{font-family:ui-monospace,Menlo,monospace;color:var(--accent);font-weight:700;font-size:.8rem}
+.lesson p{margin:14px 0}
+.lesson ul,.lesson ol{margin:12px 0;padding-left:22px}
+.lesson li{margin:7px 0}
+h4{font-size:1.05rem;margin:26px 0 8px}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:.92rem}
+th,td{border:1px solid var(--line);padding:10px 12px;text-align:left;vertical-align:top}
+th{background:var(--accent-soft);font-weight:700}
+tr:nth-child(even) td{background:rgba(127,127,127,.05)}
+pre{background:var(--code);color:var(--code-ink);padding:18px 20px;border-radius:10px;
+  overflow-x:auto;font-size:.85rem;line-height:1.6;margin:16px 0}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.88em}
+p code,li code,td code{background:var(--accent-soft);color:var(--ink);padding:2px 7px;border-radius:6px}
+pre code{background:none;padding:0;color:inherit}
+.callout{border-left:4px solid var(--accent);background:var(--accent-soft);
+  padding:14px 18px;border-radius:0 10px 10px 0;margin:18px 0;font-size:.95rem}
+.callout.violet{border-color:var(--violet);background:var(--violet-soft)}
+.callout.amber{border-color:var(--amber);background:var(--amber-soft)}
+.callout strong{display:block;margin-bottom:4px}
+.math{font-family:ui-monospace,Menlo,monospace;background:var(--code);color:var(--code-ink);
+  padding:14px 18px;border-radius:10px;margin:16px 0;overflow-x:auto;font-size:.9rem;text-align:center}
+.quiz{background:var(--violet-soft);border:1px dashed var(--violet);border-radius:var(--radius);
+  padding:18px 22px;margin:22px 0}
+.quiz h4{margin:0 0 8px;color:var(--violet)}
+.quiz ol{margin:8px 0;padding-left:20px}
+.quiz details{margin-top:10px;font-size:.92rem}
+.quiz summary{cursor:pointer;font-weight:700;color:var(--violet)}
+.roadmap{display:grid;gap:14px}
+.rm-card{border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;background:var(--surface)}
+.rm-card h3{margin:0 0 6px;font-size:1.15rem}
+.rm-card p{margin:6px 0;color:var(--muted);font-size:.95rem}
+.rm-card ul{margin:8px 0;padding-left:20px;color:var(--muted);font-size:.92rem}
+footer{border-top:1px solid var(--line);margin-top:60px;padding-top:24px;color:var(--muted);font-size:.88rem}
+footer a{color:var(--accent)}
+@media (max-width:640px){ .mod-head h2{font-size:1.5rem} }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="hero">
+  <p class="kicker">A builder's course · Theory → Internals → Practice</p>
+  <h1>LLM Deep Dive: <span class="em">how they actually work</span></h1>
+  <p class="lede">Not just how to <em>use</em> AI models — how they work internally, why GPT, Claude, Gemini and DeepSeek behave differently, how they're trained, and how to choose and optimize them for real systems. Written for working software engineers, from first principles.</p>
+  <div class="badges">
+    <span class="badge">6 modules</span><span class="badge">Module 1 published</span>
+    <span class="badge">Math included, no PhD required</span><span class="badge">Engineer-tutor voice</span>
+  </div>
+  <div class="cta-row">
+    <a class="btn primary" href="#module-1">Start Module 1</a>
+    <a class="btn ghost" href="#roadmap">Full roadmap</a>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Course contents">
+  <h2>Course map</h2>
+  <ol>
+    <li><a href="#module-1">AI &amp; LLM Fundamentals</a> — the landscape, language models, Transformers &amp; attention</li>
+    <li><a href="#roadmap">Training LLMs</a><span class="soon">next</span> — pretraining, SFT, RLHF/DPO, data &amp; scaling laws</li>
+    <li><a href="#roadmap">Why models behave differently</a><span class="soon">planned</span> — GPT vs Claude vs Gemini vs DeepSeek vs open weights</li>
+    <li><a href="#roadmap">Choosing a model</a><span class="soon">planned</span> — evals, benchmarks vs your workload, cost/latency trade-offs</li>
+    <li><a href="#roadmap">Optimizing for real apps</a><span class="soon">planned</span> — prompting, RAG, fine-tuning, inference optimization</li>
+    <li><a href="#roadmap">Open vs closed &amp; deployment</a><span class="soon">planned</span> — self-hosting, quantization, serving stacks</li>
+  </ol>
+</nav>
+
+<!-- ==================== MODULE 1 ==================== -->
+<section class="mod" id="module-1">
+  <div class="mod-head"><span class="mod-num">MODULE 1</span><h2>AI &amp; LLM Fundamentals</h2></div>
+  <p>Goal: build a precise mental model of the whole stack — from "AI" the buzzword down to the attention operation that powers every modern LLM. Everything later (training, RLHF, RAG, fine-tuning) attaches to this frame.</p>
+
+  <!-- LESSON 1.1 -->
+  <article class="lesson" id="l11">
+    <p class="lno">Lesson 1.1</p>
+    <h3>AI, ML, Deep Learning, Generative AI, LLMs — the real hierarchy</h3>
+    <p>These terms nest inside each other like Russian dolls. Most confusion in the industry comes from using them interchangeably.</p>
+    <table>
+      <tr><th>Term</th><th>What it actually means</th><th>Example</th></tr>
+      <tr><td><strong>Artificial Intelligence</strong></td><td>Any system that performs tasks normally requiring human intelligence — reasoning, perception, language, planning. Includes non-learning systems.</td><td>Chess engines, rule-based chatbots, A* pathfinding</td></tr>
+      <tr><td><strong>Machine Learning</strong></td><td>AI where behavior is <em>learned from data</em> rather than hand-coded: fit a function <code>f(x) → y</code> by minimizing error on examples.</td><td>Spam filters, credit scoring, recommendation rankers</td></tr>
+      <tr><td><strong>Deep Learning</strong></td><td>ML using multi-layer neural networks that learn hierarchical representations (edges → shapes → objects; characters → words → concepts).</td><td>Image classifiers, speech recognition</td></tr>
+      <tr><td><strong>Generative AI</strong></td><td>Deep learning models that learn a data <em>distribution</em> and <em>sample new items</em> from it, rather than classifying inputs.</td><td>LLMs, diffusion image models, voice synthesis</td></tr>
+      <tr><td><strong>LLMs</strong></td><td>Generative models over <em>language</em>: giant Transformers trained on text that model <code>P(next token | previous tokens)</code>.</td><td>GPT, Claude, Gemini, DeepSeek, Llama</td></tr>
+    </table>
+    <h4>The one-sentence discriminator</h4>
+    <ul>
+      <li>Classical ML <strong>predicts a label</strong> for an input (discriminative).</li>
+      <li>Generative AI <strong>produces new data</strong> that looks like its training distribution (generative).</li>
+      <li>An LLM is "just" a generative model whose data is text — and text turns out to encode reasoning, code, facts, and style, which is why the same mechanism does so many jobs.</li>
+    </ul>
+    <div class="callout"><strong>Mental model</strong>Think of it as specialization layers: AI is the field, ML the dominant method, deep learning the dominant architecture family, generative AI the dominant <em>task shape</em> since ~2020, and LLMs the dominant generative model class. When someone says "AI" today they usually mean LLMs — now you know exactly how much that collapses.</div>
+    <h4>A 70-year timeline in 6 beats</h4>
+    <ol>
+      <li><strong>1950s–80s:</strong> symbolic AI — hand-written rules and logic. Brittle outside narrow domains.</li>
+      <li><strong>1990s–2000s:</strong> statistical ML — SVMs, decision trees; humans engineer features, models learn weights.</li>
+      <li><strong>2012:</strong> deep learning goes mainstream (AlexNet) — networks learn the features themselves.</li>
+      <li><strong>2017:</strong> <strong>"Attention Is All You Need"</strong> — the Transformer replaces recurrence; parallelizable, scalable.</li>
+      <li><strong>2020:</strong> GPT-3 shows <em>scale alone</em> unlocks few-shot behavior — the "foundation model" era begins.</li>
+      <li><strong>2022–now:</strong> instruction tuning + RLHF turn raw predictors into assistants; open-weight models (Llama, DeepSeek, Mistral) make the stack inspectable and self-hostable.</li>
+    </ol>
+  </article>
+
+  <!-- LESSON 1.2 -->
+  <article class="lesson" id="l12">
+    <p class="lno">Lesson 1.2</p>
+    <h3>What a language model is — and how it generates responses</h3>
+    <p>A language model is a <strong>probability distribution over sequences of tokens</strong>. Given everything so far, it scores how likely each possible next token is:</p>
+    <div class="math">P(token<sub>t+1</sub> | token<sub>1</sub> … token<sub>t</sub>)</div>
+    <p>That's the entire core. A 70B-parameter model is, at inference time, an extremely sophisticated next-token guesser. Everything impressive — reasoning, code, translation — is <em>emergent behavior of predicting the next token well, at scale</em>.</p>
+    <h4>Tokens, not words</h4>
+    <p>Models don't see characters or words; they see <strong>tokens</strong> — chunks from a fixed vocabulary (typically 32k–200k entries) learned by algorithms like BPE. <code>"unbelievable"</code> might be <code>["un", "believ", "able"]</code>. Consequences engineers must internalize:</p>
+    <ul>
+      <li><strong>Context limits are token limits</strong> (128k tokens ≈ ~95k English words).</li>
+      <li><strong>Cost is per token</strong> — input and output priced separately.</li>
+      <li>Tokenization explains quirks: why models fumble at counting letters ("how many r's in strawberry?") — they never saw letters, only token chunks.</li>
+    </ul>
+    <h4>Generation: the autoregressive loop</h4>
+    <p>To produce text, the model runs a loop — this is worth visualizing as code, because it demystifies "thinking":</p>
+<pre><code>tokens = tokenize(prompt)
+while not done:
+    logits = model(tokens)            # raw scores for every vocab token
+    probs  = softmax(logits / T)       # T = temperature
+    next   = sample(probs)             # pick one token
+    tokens.append(next)
+    if next == EOS or len(tokens) > max_len: done = True
+return detokenize(tokens)</code></pre>
+    <p>Each new token is <strong>appended and fed back in</strong> — hence <em>autoregressive</em>. The model never "plans" a paragraph; coherence emerges because each step conditions on all previous steps.</p>
+    <h4>Decoding: where the randomness (and control) lives</h4>
+    <table>
+      <tr><th>Knob</th><th>What it does</th><th>When to use it</th></tr>
+      <tr><td><code>temperature</code></td><td>Sharpens (<code>T→0</code>, deterministic) or flattens (<code>T→1+</code>, creative/random) the distribution.</td><td><code>T≈0</code> for code, extraction, evals; <code>0.7–1.0</code> for brainstorming, writing.</td></tr>
+      <tr><td><code>top_p</code> (nucleus)</td><td>Samples from the smallest set of tokens covering <code>p</code> of probability mass.</td><td><code>0.9–0.95</code> general default; lower for focus.</td></tr>
+      <tr><td><code>top_k</code></td><td>Restricts sampling to the <code>k</code> most likely tokens.</td><td>Alternative to <code>top_p</code>; common in open models.</td></tr>
+      <tr><td><code>max_tokens</code>, stop sequences</td><td>Hard caps on length / termination signals.</td><td>Always set in production to bound cost.</td></tr>
+    </table>
+    <div class="callout violet"><strong>Why the same prompt gives different answers</strong>Sampling is stochastic by design. Same prompt + <code>T &gt; 0</code> → different token draws → different continuations. This is a feature (diversity) and the reason evals and production pipelines pin <code>T=0</code> + seeds when determinism matters.</div>
+    <div class="callout amber"><strong>Key limitation to carry forward</strong>A base LM predicts <em>likely</em> text, not <em>true</em> text. Fluency ≠ factuality. Hallucination isn't a bug in the mechanism — it's the mechanism operating without grounding. Fixes (RAG, tool use, verification) all live <em>outside</em> this loop; Module 5 covers them.</div>
+    <div class="quiz"><h4>Check your understanding</h4>
+      <ol>
+        <li>Why does lowering temperature make output more deterministic, mathematically?</li>
+        <li>A model miscounts letters in a word. Explain using tokenization.</li>
+        <li>Is beam search "smarter" than sampling? When would you prefer each?</li>
+      </ol>
+      <details><summary>Hints</summary>1. Softmax divides logits by T; as T→0 the largest logit dominates → argmax. 2. The model operates on token IDs, not characters; "strawberry" may be 2–3 tokens. 3. Beam search maximizes sequence likelihood (good for translation); sampling gives diversity (good for creative tasks).</details>
+    </div>
+  </article>
+
+  <!-- LESSON 1.3 -->
+  <article class="lesson" id="l13">
+    <p class="lno">Lesson 1.3</p>
+    <h3>Transformers &amp; attention — the engine room</h3>
+    <p>Before 2017, sequence models were <strong>recurrent</strong> (RNNs/LSTMs): they processed tokens one at a time, carrying a hidden state. Two fatal problems: <strong>no parallelism</strong> (step <code>t</code> waits for <code>t−1</code>) and <strong>vanishing gradients</strong> over long distances. The Transformer ("Attention Is All You Need", Vaswani et al., 2017) deleted recurrence entirely and replaced it with <strong>attention</strong>.</p>
+    <h4>Attention in one paragraph</h4>
+    <p>When processing a token, attention lets it <strong>look at every other token</strong> and pull in a weighted blend of their information — weights decided by learned relevance. In <em>"The animal didn't cross the street because it was too tired"</em>, attention lets <em>"it"</em> strongly weight <em>"animal"</em> over <em>"street"</em>. That dynamic, content-based routing is the whole trick.</p>
+    <h4>Self-attention, concretely: Q, K, V</h4>
+    <p>Each token's embedding is projected into three vectors:</p>
+    <ul>
+      <li><strong>Query (Q)</strong> — "what am I looking for?"</li>
+      <li><strong>Key (K)</strong> — "what do I contain / advertise?"</li>
+      <li><strong>Value (V)</strong> — "what do I actually contribute if selected?"</li>
+    </ul>
+    <p>Relevance of token <code>j</code> to token <code>i</code> = dot product <code>Q_i · K_j</code>. Normalize with softmax, use as weights over <code>V</code>:</p>
+    <div class="math">Attention(Q, K, V) = softmax(QK<sup>T</sup> / √d<sub>k</sub>) · V</div>
+    <p>The <code>√d_k</code> scaling keeps dot products from exploding in high dimensions (which would saturate softmax and kill gradients). That's the entire operation — matrix multiplies, fully parallelizable across all positions. <strong>This parallelizability is why Transformers scale and RNNs didn't.</strong></p>
+    <h4>Multi-head attention</h4>
+    <p>One attention head learns one <em>type</em> of relationship (e.g., subject→verb). A layer runs <strong>h heads in parallel</strong> (e.g., 32), each with its own Q/K/V projections, then concatenates. Different heads specialize: syntax, coreference, positional patterns. Think of it as the model attending to many linguistic aspects simultaneously.</p>
+    <h4>Position has to be injected</h4>
+    <p>Attention is permutation-invariant — shuffle the tokens, get the same result. So order is added explicitly via <strong>positional encodings</strong>: original sinusoidal vectors, learned embeddings, and in modern LLMs <strong>RoPE</strong> (Rotary Position Embeddings), which bakes relative position into the Q/K rotations and extrapolates better to long contexts.</p>
+    <h4>The full Transformer block</h4>
+<pre><code>x = x + MultiHeadAttention(LayerNorm(x))   # communicate between positions
+x = x + FeedForward(LayerNorm(x))            # per-position computation (MLP)
+# stacked N times (e.g., 32–96 layers); residual connections (+) let
+# gradients flow through depth — without them, deep nets don't train.</code></pre>
+    <ul>
+      <li>The <strong>feed-forward network</strong> (2-layer MLP, often SwiGLU in modern models) holds most of the parameters — it's where "knowledge" largely lives; attention is the routing.</li>
+      <li><strong>Decoder-only</strong> (GPT, Claude, Llama, DeepSeek): causal masking — each token attends only to earlier tokens. This is the LLM standard because it matches the autoregressive objective exactly.</li>
+      <li><strong>Encoder-only</strong> (BERT): bidirectional attention; great for classification/embeddings, can't generate.</li>
+      <li><strong>Encoder-decoder</strong> (T5): reads input bidirectionally, generates output — classic for translation, rarer in frontier LLMs today.</li>
+    </ul>
+    <h4>Why behavior differs between models (preview of Module 3)</h4>
+    <p>Same Transformer skeleton, different outcomes — because of <strong>data mix, scale, tokenizer, training objective tweaks, and post-training</strong> (instruction tuning, RLHF). Architecture is ~20% of the story; the rest is what it ate and how it was raised. You'll be able to say this precisely after Modules 2–3.</p>
+    <div class="callout"><strong>The three ideas to keep</strong>1. Attention = differentiable, parallel information routing by learned relevance. 2. Depth + residuals + scale convert that routing into reasoning-like behavior. 3. The decoder-only Transformer trained on next-token prediction <em>is</em> the modern LLM — everything else is scaffolding around it.</div>
+    <div class="quiz"><h4>Check your understanding</h4>
+      <ol>
+        <li>Why couldn't RNNs exploit GPUs the way Transformers can?</li>
+        <li>What breaks if you remove positional encodings? Give a concrete example.</li>
+        <li>Why do frontier LLMs use decoder-only rather than encoder-decoder architectures?</li>
+      </ol>
+      <details><summary>Hints</summary>1. Sequential dependency: hidden state at t needs t−1, so no parallelization across the sequence; attention computes all pairs at once. 2. "Dog bites man" vs "man bites dog" become identical — attention without position is a bag of tokens. 3. The pretraining objective (next-token prediction) is inherently causal; decoder-only is simpler, scales cleanly, and one model does both understanding and generation.</details>
+    </div>
+  </article>
+
+  <article class="lesson" id="l1wrap">
+    <p class="lno">Module 1 · Wrap-up</p>
+    <h3>What you can now explain</h3>
+    <ul>
+      <li>The exact nesting: AI ⊃ ML ⊃ Deep Learning ⊃ Generative AI ⊃ LLMs — and what each layer adds.</li>
+      <li>A language model as <code>P(next token | context)</code>; tokenization; the autoregressive sampling loop; what temperature/top-p actually do.</li>
+      <li>Why attention replaced recurrence; Q/K/V and the attention equation; multi-head; positional encodings; the decoder-only block.</li>
+      <li>Why fluency ≠ truth, and why the same prompt can give different outputs.</li>
+    </ul>
+    <p><strong>Coming in Module 2:</strong> how these models are <em>trained</em> — pretraining at scale, supervised fine-tuning, RLHF/DPO, data curation, and the scaling laws that predict capability from compute. The site will grow module by module.</p>
+  </article>
+</section>
+
+<!-- ==================== ROADMAP ==================== -->
+<section class="mod" id="roadmap">
+  <div class="mod-head"><span class="mod-num">ROADMAP</span><h2>Modules 2 – 6</h2></div>
+  <p>The course builds in order. Each module will be published here as it's written.</p>
+  <div class="roadmap">
+    <div class="rm-card">
+      <h3>Module 2 — Training LLMs</h3>
+      <p>From random weights to a base model to an assistant.</p>
+      <ul><li>Pretraining: data pipelines, tokenization at scale, the training loop</li>
+      <li>Scaling laws (Kaplan, Chinchilla) — predicting loss from compute</li>
+      <li>Supervised fine-tuning (SFT) and instruction tuning</li>
+      <li>RLHF, RLAIF, DPO — how human preferences become gradients</li></ul>
+    </div>
+    <div class="rm-card">
+      <h3>Module 3 — Why models behave differently</h3>
+      <p>GPT vs Claude vs Gemini vs DeepSeek vs open weights: architecture tweaks (MoE, GQA, MLA), data mix, post-training recipes, and system prompts — what actually drives the differences you feel.</p>
+    </div>
+    <div class="rm-card">
+      <h3>Module 4 — Choosing a model</h3>
+      <p>Benchmarks vs your workload, eval harnesses, cost/latency/quality trade-offs, when the biggest model is the wrong answer.</p>
+    </div>
+    <div class="rm-card">
+      <h3>Module 5 — Optimizing for real applications</h3>
+      <p>Prompt engineering as programming, RAG architectures, tool use/agents, fine-tuning vs retrieval, eval-driven iteration, inference optimization (quantization, KV-cache, speculative decoding).</p>
+    </div>
+    <div class="rm-card">
+      <h3>Module 6 — Open vs closed &amp; deployment</h3>
+      <p>Self-hosting open weights (vLLM, Ollama), quantization formats (GGUF, AWQ), serving stacks, licensing, and the build-vs-buy decision.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><strong>LLM Deep Dive</strong> — a structured engineering course. Module 1 published October 2026. Built as a static site; new modules appear here as they're written.</p>
+  <p>Key reference: Vaswani et al., <em>Attention Is All You Need</em> (2017). Concepts verified against standard treatments; math notation follows the original paper.</p>
+</footer>
+
+</div>
+</body>
+</html>
