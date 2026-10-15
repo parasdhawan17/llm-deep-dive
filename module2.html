@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light dark" />
+<title>Module 2: Training LLMs — LLM Deep Dive</title>
+<meta name="description" content="How models are trained: pretraining at scale, scaling laws, instruction tuning, RLHF and DPO." />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="topnav"><div class="inner">
+<a class="brand" href="index.html">LLM <span>Deep Dive</span></a>
+<nav aria-label="Modules"><a href="module1.html">M1</a><a href="module2.html" class="active">M2</a><a href="module3.html">M3</a><a href="module4.html">M4</a><a href="module5.html">M5</a><a href="module6.html">M6</a></nav>
+</div></div>
+
+<div class="page">
+<p class="crumb"><a href="index.html">Course home</a> / Module 2</p>
+<section class="mod" id="module-2">
+  <div class="mod-head"><span class="mod-num">MODULE 2</span><h2>Training LLMs</h2></div>
+  <p>Module 1 showed how a model generates text. This module shows how engineers build the model. You will follow three stages: pretraining, fine-tuning, and preference training.</p>
+
+  <article class="lesson" id="l21">
+    <p class="lno">Lesson 2.1</p>
+    <h3>Pretraining: From Raw Text to a Base Model</h3>
+    <p>Pretraining teaches a model to predict the next token. A token is a piece of text that the model reads. Engineers train on trillions of tokens.</p>
+    <p>The result is a base model. A base model is a model that predicts likely text. It does not follow instructions yet.</p>
+    <h4>The data pipeline</h4>
+    <p>Good data matters more than clever code. The pipeline has four steps.</p>
+    <ol>
+      <li>Collect text from books, code, and web pages.</li>
+      <li>Remove spam, ads, and broken pages.</li>
+      <li>Remove duplicate text.</li>
+      <li>Convert clean text into tokens.</li>
+    </ol>
+    <p>A web crawl can collect trillions of words. Most of it is low quality. Filters keep only useful text. Duplicate text is harmful because the model learns to repeat it.</p>
+    <h4>The training loop</h4>
+    <p>Training repeats one small loop billions of times. Each pass through the loop is a training step. A training step updates the model once.</p>
+    <p>Each step trains on a batch. A batch is a group of token sequences.</p>
+<pre><code>for step in range(total_steps):
+    batch = get_next_batch(data)      # a group of token sequences
+    guess = model.forward(batch)      # forward pass: predict next tokens
+    loss = measure_error(guess, batch) # loss: a number for the error
+    model.update(loss)                # backpropagation + optimizer step</code></pre>
+    <p>The forward pass makes predictions. The loss measures the error. Loss is a number that measures prediction error.</p>
+    <p>Backpropagation is a method that traces error back to each weight. A weight is a number inside the model.</p>
+    <p>The optimizer then changes each weight by a small amount. An optimizer is a tool that updates weights. Adam is the most common optimizer.</p>
+    <h4>Why training needs thousands of GPUs</h4>
+    <p>A GPU is a chip that does fast math. One GPU is far too slow for pretraining. Engineers split the work across thousands of GPUs.</p>
+    <ul>
+      <li>Data parallelism: each GPU trains on a different batch.</li>
+      <li>Model parallelism: the model itself is split across GPUs.</li>
+    </ul>
+    <p>Training can run for many weeks. The cost can reach tens of millions of dollars. This is why only a few labs train frontier models. A frontier model is a model at the edge of current ability.</p>
+    <div class="callout"><strong>Note:</strong> Pretraining gives knowledge. Later stages shape behavior. Do not expect a base model to act like an assistant.</div>
+    <div class="quiz"><h4>Check your understanding</h4>
+      <ol>
+        <li>Why do engineers remove duplicate text before training?</li>
+        <li>What does the optimizer do in each training step?</li>
+        <li>Why can one GPU not train a frontier model alone?</li>
+      </ol>
+      <details><summary>Hints</summary>1. Duplicates teach repetition. 2. It updates weights to reduce loss. 3. The compute need is too large; work must split across thousands of chips.</details>
+    </div>
+  </article>
+
+  <article class="lesson" id="l22">
+    <p class="lno">Lesson 2.2</p>
+    <h3>Scaling Laws: Predictable Gains From Scale</h3>
+    <p>Scaling laws describe how loss falls with more resources. The pattern is smooth and predictable.</p>
+    <p>In 2020, Kaplan and others found a simple rule. Loss falls in a straight line on a log scale. This holds when you increase compute, data, or parameters. A parameter is a weight that the model learns.</p>
+    <p>You can predict the final loss before training ends. This helps labs plan large training runs.</p>
+    <h4>The Chinchilla correction</h4>
+    <p>In 2022, the Chinchilla study corrected the recipe. Earlier models used too many parameters and too few tokens. The new rule is simple: use about 20 tokens per parameter.</p>
+    <div class="math">tokens &asymp; 20 &times; parameters</div>
+    <table>
+      <tr><th>Model size</th><th>Tokens needed (about)</th></tr>
+      <tr><td>7B parameters</td><td>140B tokens</td></tr>
+      <tr><td>70B parameters</td><td>1.4T tokens</td></tr>
+      <tr><td>400B parameters</td><td>8T tokens</td></tr>
+    </table>
+    <p>For a fixed budget, balance model size and data size. A small model with more data often beats a large model with little data. Overtraining a tiny model also wastes money, so use the rule as a guide.</p>
+    <div class="callout violet"><strong>Note:</strong> Scaling laws predict loss, not usefulness. A lower loss usually means a better model, but you must still test on real tasks.</div>
+    <div class="quiz"><h4>Check your understanding</h4>
+      <ol>
+        <li>A lab plans a 13B model. About how many tokens does the Chinchilla rule suggest?</li>
+        <li>Why do scaling laws help labs plan training budgets?</li>
+        <li>Can a low loss guarantee a useful model? Why or why not?</li>
+      </ol>
+      <details><summary>Hints</summary>1. Multiply 13B by 20 to get about 260B tokens. 2. They predict loss from compute before spending money. 3. No; loss measures prediction error, not task success.</details>
+    </div>
+  </article>
+
+  <article class="lesson" id="l23">
+    <p class="lno">Lesson 2.3</p>
+    <h3>Supervised Fine-Tuning: From Predictor to Assistant</h3>
+    <p>A base model predicts likely text. It does not follow instructions. Supervised fine-tuning (SFT) changes that. SFT trains the model on chosen examples.</p>
+    <p>Each example pairs an instruction with a good response. Instruction tuning is SFT with instruction examples. The dataset is small: thousands of examples, not trillions.</p>
+    <h4>Why a little good data changes so much</h4>
+    <p>The model already knows facts from pretraining. SFT teaches style and behavior. It learns to answer directly. It learns to refuse unsafe requests. It learns a helpful tone.</p>
+    <p>Quality beats size here. A few thousand excellent examples can shift behavior strongly. Poor examples teach poor habits.</p>
+    <h4>The SFT procedure</h4>
+    <ol>
+      <li>Collect instruction and response pairs.</li>
+      <li>Check each pair for quality.</li>
+      <li>Train the base model on the pairs with a small learning rate.</li>
+      <li>Test the model on new instructions.</li>
+    </ol>
+    <p>Engineers use a small learning rate. A learning rate is the size of each weight update. Small updates protect the knowledge from pretraining.</p>
+    <div class="callout amber"><strong>Note:</strong> SFT adds little new knowledge. New facts come from pretraining. SFT mainly changes how the model uses what it knows.</div>
+    <div class="quiz"><h4>Check your understanding</h4>
+      <ol>
+        <li>What is the input and output of one SFT example?</li>
+        <li>Why does SFT use far less data than pretraining?</li>
+        <li>A model gives rude answers after SFT. What likely went wrong?</li>
+      </ol>
+      <details><summary>Hints</summary>1. The input is an instruction; the target is a good response. 2. It shapes behavior, not knowledge. 3. The example data likely had poor quality or poor tone.</details>
+    </div>
+  </article>
+
+  <article class="lesson" id="l24">
+    <p class="lno">Lesson 2.4</p>
+    <h3>RLHF, RLAIF, and DPO: Learning From Preferences</h3>
+    <p>SFT teaches the format of a good answer. It does not teach which answer humans prefer. Preference training fills this gap.</p>
+    <h4>RLHF in four steps</h4>
+    <p>RLHF means reinforcement learning from human feedback. The method has four steps.</p>
+    <ol>
+      <li>Show humans two answers to one prompt.</li>
+      <li>Record which answer each human prefers.</li>
+      <li>Train a reward model on these choices.</li>
+      <li>Update the language model to earn high reward scores.</li>
+    </ol>
+    <p>A reward model is a model that scores answer quality. PPO then updates the language model in small safe steps. PPO is an algorithm that limits each update size.</p>
+    <h4>RLAIF: AI judges instead of humans</h4>
+    <p>RLAIF means reinforcement learning from AI feedback. A strong AI model ranks the answers instead of humans. AI judges cost less and work faster. Human judges still give better quality for hard cases.</p>
+    <h4>DPO: a simpler path</h4>
+    <p>DPO means direct preference optimization. DPO trains directly on human choices. It needs no reward model. It needs no PPO. This makes DPO simple and stable. Many open models use DPO.</p>
+    <div class="callout"><strong>Note:</strong> RLHF can make models too agreeable. A model may please the user instead of giving a true answer. Sycophancy means excessive agreement.</div>
+    <div class="quiz"><h4>Check your understanding</h4>
+      <ol>
+        <li>What data does a reward model learn from?</li>
+        <li>How does RLAIF differ from RLHF?</li>
+        <li>Why might a team choose DPO over RLHF?</li>
+      </ol>
+      <details><summary>Hints</summary>1. Human rankings of answer pairs. 2. An AI judge replaces human judges. 3. DPO is simpler; it skips the reward model and PPO.</details>
+    </div>
+  </article>
+
+  <article class="lesson" id="l2wrap">
+    <p class="lno">Module 2 · Wrap-up</p>
+    <h3>What you can now explain</h3>
+    <ul>
+      <li>How raw text becomes a base model: collect, filter, deduplicate, tokenize, then loop forward pass, loss, backpropagation, and optimizer step.</li>
+      <li>Why pretraining needs thousands of GPUs and costs tens of millions of dollars.</li>
+      <li>The Chinchilla rule: about 20 tokens per parameter, and how to use it for budgets.</li>
+      <li>How SFT turns a predictor into an assistant with a few thousand good examples.</li>
+      <li>How RLHF, RLAIF, and DPO use preferences to shape model behavior.</li>
+    </ul>
+    <p><strong>Coming in Module 3:</strong> why GPT, Claude, Gemini, and DeepSeek feel different even though they share the same Transformer core.</p>
+  </article>
+</section>
+<div class="pager">
+<a href="module1.html"><span class="dir">&larr; Previous</span><span class="ttl">Module 1: AI &amp; LLM Fundamentals</span></a>
+<a class="next" href="module3.html"><span class="dir">Next &rarr;</span><span class="ttl">Module 3: Why Models Behave Differently</span></a>
+</div>
+
+<footer>
+  <p><strong>LLM Deep Dive</strong> — a structured engineering course. Modules 1–6 published October 2026, written in Simplified Technical English (ASD-STE100): short sentences, one idea per sentence, plain words.</p>
+  <p>Key reference: Vaswani et al., <em>Attention Is All You Need</em> (2017).</p>
+</footer>
+</div>
+</body>
+</html>

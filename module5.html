@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light dark" />
+<title>Module 5: Optimizing for Real Applications — LLM Deep Dive</title>
+<meta name="description" content="How to optimize: prompting, RAG, tools and agents, fine-tuning vs RAG, inference optimization." />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="topnav"><div class="inner">
+<a class="brand" href="index.html">LLM <span>Deep Dive</span></a>
+<nav aria-label="Modules"><a href="module1.html">M1</a><a href="module2.html">M2</a><a href="module3.html">M3</a><a href="module4.html">M4</a><a href="module5.html" class="active">M5</a><a href="module6.html">M6</a></nav>
+</div></div>
+
+<div class="page">
+<p class="crumb"><a href="index.html">Course home</a> / Module 5</p>
+<section class="mod" id="module-5">
+<div class="mod-head"><span class="mod-num">MODULE 5</span><h2>Optimizing for Real Applications</h2></div>
+<p>This module teaches you how to improve results in real applications. You will learn prompt design and RAG. You will learn tools, agents, and fine-tuning. You will learn how to make inference cheaper and faster.</p>
+
+<article class="lesson" id="l51">
+<p class="lno">Lesson 5.1</p><h3>Prompt design and RAG</h3>
+<p>A prompt is the text you send to the model. Good prompts act like programs. They control what the model does.</p>
+<h4>Three parts of a strong prompt</h4>
+<ol>
+<li><strong>Role.</strong> A role tells the model its job. Example: "You are a bank support agent. Answer in short, polite sentences."</li>
+<li><strong>Instructions.</strong> Instructions are clear steps. Write them as a short numbered list. Put the most important rule first.</li>
+<li><strong>Examples.</strong> Examples show input and output pairs. Two or three examples are usually enough. This is called few-shot prompting.</li>
+</ol>
+<h4>RAG in seven steps</h4>
+<p>RAG means retrieval-augmented generation. The model reads parts of your documents before it answers.</p>
+<p>An embedding is a list of numbers. It shows the meaning of a text. Texts with close meanings have close numbers. A vector store is a database for embeddings.</p>
+<ol>
+<li>Split your documents into small chunks of 300 to 800 tokens.</li>
+<li>Convert each chunk into an embedding.</li>
+<li>Store all embeddings in a vector store.</li>
+<li>Convert the user question into an embedding.</li>
+<li>Find the chunks with the closest meaning.</li>
+<li>Add the top chunks to the prompt.</li>
+<li>Send the prompt to the model.</li>
+</ol>
+<pre><code>chunks = split(documents)
+store.add(embed(chunks))
+top = store.search(embed(question), k=5)
+answer = model(prompt + top)</code></pre>
+<h4>When RAG helps and when it does not</h4>
+<table>
+<tr><th>Situation</th><th>Use RAG?</th></tr>
+<tr><td>Answers need private company data</td><td>Yes</td></tr>
+<tr><td>Facts change often</td><td>Yes</td></tr>
+<tr><td>You must cite sources</td><td>Yes</td></tr>
+<tr><td>The model already knows the facts</td><td>No</td></tr>
+<tr><td>The task needs pure reasoning</td><td>No</td></tr>
+<tr><td>Simple open chat</td><td>No</td></tr>
+</table>
+<div class="callout"><strong>Note:</strong> RAG grounds the model in your data. It does not fix weak reasoning. Choose a strong model for hard reasoning.</div>
+<div class="quiz"><h4>Check your understanding</h4>
+<ol>
+<li>List the three parts of a strong prompt.</li>
+<li>What does the vector store hold?</li>
+<li>Name one case where RAG does not help.</li>
+</ol>
+<details><summary>Hints</summary>1. Role, instructions, examples. 2. Embeddings of your document chunks. 3. For example, pure reasoning tasks or simple open chat.</details>
+</div>
+</article>
+
+<article class="lesson" id="l52">
+<p class="lno">Lesson 5.2</p><h3>Tools, agents, and fine-tuning</h3>
+<h4>Tool use in six steps</h4>
+<p>A tool is your code that the model can call. Function calling is the name for this skill.</p>
+<ol>
+<li>Describe each tool: its name and its inputs.</li>
+<li>The model reads the user request.</li>
+<li>The model chooses a tool and gives input values.</li>
+<li>Your code runs the tool.</li>
+<li>You send the tool result back to the model.</li>
+<li>The model writes the final answer.</li>
+</ol>
+<h4>Agents</h4>
+<p>An agent is a model that works in a loop. It plans, acts with tools, and observes results. It repeats these steps until the task is done.</p>
+<pre><code>while task not done:
+    plan = model.think(state)
+    result = tools.run(plan.action)
+    state.update(result)</code></pre>
+<h4>Fine-tuning vs RAG</h4>
+<p>Fine-tuning is extra training on your examples. It changes the model weights.</p>
+<table>
+<tr><th>Your need</th><th>Best choice</th></tr>
+<tr><td>The model must know new facts</td><td>RAG</td></tr>
+<tr><td>Answers must follow your style</td><td>Fine-tuning</td></tr>
+<tr><td>You must show sources</td><td>RAG</td></tr>
+<tr><td>You have thousands of example pairs</td><td>Fine-tuning</td></tr>
+<tr><td>Your budget is small</td><td>RAG</td></tr>
+<tr><td>You need both facts and style</td><td>Use both</td></tr>
+</table>
+<div class="callout violet"><strong>Note:</strong> Use RAG for knowledge. Use fine-tuning for behavior. Many strong systems use both together.</div>
+<div class="quiz"><h4>Check your understanding</h4>
+<ol>
+<li>What happens in step 4 of tool use?</li>
+<li>How is an agent different from one model call?</li>
+<li>When is fine-tuning the wrong choice?</li>
+</ol>
+<details><summary>Hints</summary>1. Your code runs the tool the model chose. 2. An agent loops: plan, act, observe, repeat. 3. When you need new facts or sources — use RAG instead.</details>
+</div>
+</article>
+
+<article class="lesson" id="l53">
+<p class="lno">Lesson 5.3</p><h3>Inference optimization</h3>
+<p>Inference is the act of running the model to make answers.</p>
+<h4>Quantization</h4>
+<p>Quantization stores each weight with fewer bits. Fewer bits mean less memory.</p>
+<table>
+<tr><th>Format</th><th>Bits per weight</th><th>Memory vs FP32</th><th>Quality</th></tr>
+<tr><td>FP32</td><td>32</td><td>Full</td><td>Best</td></tr>
+<tr><td>FP16</td><td>16</td><td>Half</td><td>Almost best</td></tr>
+<tr><td>INT8</td><td>8</td><td>Quarter</td><td>Small loss</td></tr>
+<tr><td>INT4</td><td>4</td><td>Eighth</td><td>Clear loss on hard tasks</td></tr>
+</table>
+<p>Most teams use FP16 or INT8 for good balance.</p>
+<h4>KV-cache</h4>
+<p>The KV-cache stores past attention values. The model reuses them for each new token. This makes long answers much faster. It uses extra memory.</p>
+<h4>Speculative decoding</h4>
+<p>A small model writes a draft answer. The large model checks the draft. Correct parts stay. Wrong parts get fixed. This is faster than the large model alone.</p>
+<table>
+<tr><th>Method</th><th>What it saves</th><th>What it costs</th></tr>
+<tr><td>Quantization</td><td>Memory</td><td>Some quality</td></tr>
+<tr><td>KV-cache</td><td>Time</td><td>Memory</td></tr>
+<tr><td>Speculative decoding</td><td>Time</td><td>An extra small model</td></tr>
+</table>
+<div class="callout"><strong>Note:</strong> Measure quality after each change. Speed means nothing if answers get worse.</div>
+<div class="quiz"><h4>Check your understanding</h4>
+<ol>
+<li>How much memory does INT8 save compared with FP32?</li>
+<li>What does the KV-cache store?</li>
+<li>Why is speculative decoding faster?</li>
+</ol>
+<details><summary>Hints</summary>1. About three quarters — INT8 uses one quarter of the memory. 2. Past attention values, reused for each new token. 3. The small model drafts fast; the large model only checks.</details>
+</div>
+</article>
+
+<article class="lesson" id="l5wrap">
+<p class="lno">Module 5 · Wrap-up</p><h3>What you can now do</h3>
+<ul>
+<li>Write prompts with role, instructions, and examples.</li>
+<li>Build RAG in seven steps: split, embed, store, retrieve, add, send.</li>
+<li>Give a model tools, and explain how agents loop.</li>
+<li>Choose between RAG and fine-tuning with a decision table.</li>
+<li>Save memory and time with quantization, KV-cache, and speculative decoding.</li>
+</ul>
+<p>Next: Module 6 compares open and closed models and shows how to deploy them.</p>
+</article>
+</section>
+<div class="pager">
+<a href="module4.html"><span class="dir">&larr; Previous</span><span class="ttl">Module 4: Choosing a Model</span></a>
+<a class="next" href="module6.html"><span class="dir">Next &rarr;</span><span class="ttl">Module 6: Open vs Closed and Deployment</span></a>
+</div>
+
+<footer>
+  <p><strong>LLM Deep Dive</strong> — a structured engineering course. Modules 1–6 published October 2026, written in Simplified Technical English (ASD-STE100): short sentences, one idea per sentence, plain words.</p>
+  <p>Key reference: Vaswani et al., <em>Attention Is All You Need</em> (2017).</p>
+</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="light dark" />
+<title>Module 1: AI & LLM Fundamentals — LLM Deep Dive</title>
+<meta name="description" content="The full stack in one frame: AI to LLMs, how language models generate text, and the Transformer with attention." />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="topnav"><div class="inner">
+<a class="brand" href="index.html">LLM <span>Deep Dive</span></a>
+<nav aria-label="Modules"><a href="module1.html" class="active">M1</a><a href="module2.html">M2</a><a href="module3.html">M3</a><a href="module4.html">M4</a><a href="module5.html">M5</a><a href="module6.html">M6</a></nav>
+</div></div>
+
+<div class="page">
+<p class="crumb"><a href="index.html">Course home</a> / Module 1</p>
+<section class="mod" id="module-1">
+  <div class="mod-head"><span class="mod-num">MODULE 1</span><h2>AI &amp; LLM Fundamentals</h2></div>
+  <p>Goal: Build a clear mental model of the full stack.</p>
+  <p>You start from the word "AI". You end at the attention operation. Attention is the core of every modern LLM.</p>
+  <p>Later modules attach to this frame. They cover training, RLHF, RAG, and fine-tuning.</p>
+
+  <!-- LESSON 1.1 -->
+  <article class="lesson" id="l11">
+    <p class="lno">Lesson 1.1</p>
+    <h3>AI, Machine Learning, Deep Learning, Generative AI, and LLMs — the hierarchy</h3>
+    <p>These terms fit inside each other, like boxes inside boxes.</p>
+    <p>AI is the largest box. Each smaller box is a special case. Most confusion comes from mixing the names.</p>
+    <table>
+      <tr><th>Term</th><th>What it actually means</th><th>Example</th></tr>
+      <tr><td><strong>Artificial Intelligence</strong></td><td>A system that does tasks that need human intelligence. Examples are reasoning, language, and planning. It includes systems that do not learn.</td><td>Chess engines, rule-based chatbots, A* pathfinding</td></tr>
+      <tr><td><strong>Machine Learning</strong></td><td>AI that learns from data. You do not write the rules. You give examples. The model learns a function <code>f(x) → y</code>. It reduces the error on the examples.</td><td>Spam filters, credit scoring, recommendation rankers</td></tr>
+      <tr><td><strong>Deep Learning</strong></td><td>ML with neural networks. A neural network has many layers of simple units. It learns features in steps. Example: edges, then shapes, then objects.</td><td>Image classifiers, speech recognition</td></tr>
+      <tr><td><strong>Generative AI</strong></td><td>Deep learning that learns the distribution of data. A distribution is a set of probabilities. The model then creates new data from it. It does not classify input.</td><td>LLMs, diffusion image models, voice synthesis</td></tr>
+      <tr><td><strong>LLMs</strong></td><td>A generative model of language. It is a large Transformer. It trains on text. It models <code>P(next token | previous tokens)</code>.</td><td>GPT, Claude, Gemini, DeepSeek, Llama</td></tr>
+    </table>
+    <h4>The difference in one sentence</h4>
+    <ul>
+      <li>Classical ML predicts a label for an input.</li>
+      <li>Generative AI creates new data. The new data looks like the training data.</li>
+      <li>An LLM is a generative model of text. Text holds facts, code, style, and reasoning. One simple rule gives many skills.</li>
+    </ul>
+    <div class="callout"><strong>Mental model</strong>Think in layers. AI is the field. ML is the main method. Deep learning is the main model family. Generative AI is the main task type since 2020. LLMs are the main generative models. When people say "AI" today, they often mean LLMs. Now you see the full picture.</div>
+    <h4>A 70-year timeline in six steps</h4>
+    <ol>
+      <li><strong>1950s–80s:</strong> Symbolic AI. People wrote rules by hand. The rules worked only in narrow tasks.</li>
+      <li><strong>1990s–2000s:</strong> Statistical ML. Common models: SVMs and decision trees. People designed the features. Models learned the weights.</li>
+      <li><strong>2012:</strong> Deep learning becomes popular (AlexNet). Networks learn the features themselves.</li>
+      <li><strong>2017:</strong> "Attention Is All You Need". The Transformer replaces recurrence. It trains in parallel. It scales well.</li>
+      <li><strong>2020:</strong> GPT-3 shows that scale alone gives new skills. Few-shot learning appears. The era of foundation models starts. A foundation model is a large model trained on broad data. People adapt it to many tasks.</li>
+      <li><strong>2022–now:</strong> Instruction tuning and RLHF make raw models act as assistants. Open-weight models appear: Llama, DeepSeek, Mistral. You can inspect and run them yourself.</li>
+    </ol>
+  </article>
+
+  <!-- LESSON 1.2 -->
+  <article class="lesson" id="l12">
+    <p class="lno">Lesson 1.2</p>
+    <h3>What a language model is — and how it writes answers</h3>
+    <p>A language model predicts the next token. It uses all previous tokens.</p>
+    <p>A distribution is a set of probabilities. It shows how likely each next token is.</p>
+    <div class="math">P(token<sub>t+1</sub> | token<sub>1</sub> … token<sub>t</sub>)</div>
+    <p>Read it as: the probability of the next token, given all tokens before it.</p>
+    <p>A 70B model does only this one task when it answers. It is a predictor of the next token. New skills appear from this simple rule. We call this emergent behavior. Emergent behavior is a new ability that appears from simple rules.</p>
+    <h4>Tokens, not words</h4>
+    <p>Models do not read words. They read tokens. A token is a small piece of text. It can be a word or part of a word.</p>
+    <p>The tokenizer changes text to tokens and back. It uses a fixed list. This list is the vocabulary. A vocabulary has 32,000 to 200,000 entries. Byte Pair Encoding (BPE) is a common algorithm. It builds the vocabulary from text.</p>
+    <p>Example: <code>"unbelievable"</code> can become <code>["un", "believ", "able"]</code>.</p>
+    <p>Three facts matter for engineers:</p>
+    <ul>
+      <li><strong>Context limits are token limits.</strong> 128,000 tokens are about 95,000 English words.</li>
+      <li><strong>Cost is per token.</strong> Input and output have different prices.</li>
+      <li><strong>Tokenization explains errors.</strong> Models cannot count letters in a word. They never see letters. They see only token pieces.</li>
+    </ul>
+    <h4>Generation: the autoregressive loop</h4>
+    <p>The model writes text in a loop. Each step adds one token.</p>
+    <p>Autoregressive means this: the model uses its own output as new input.</p>
+<pre><code>tokens = tokenize(prompt)
+while not done:
+    logits = model(tokens)            # raw scores for every vocab token
+    probs  = softmax(logits / T)       # T = temperature
+    next   = sample(probs)             # pick one token
+    tokens.append(next)
+    if next == EOS or len(tokens) > max_len: done = True
+return detokenize(tokens)</code></pre>
+    <p>The code shows each step. Here is the same loop as actions:</p>
+    <ol>
+      <li>Change the prompt to tokens.</li>
+      <li>Ask the model for logits. Logits are raw scores. There is one logit for each token.</li>
+      <li>Change the logits to probabilities. Use softmax and temperature. Softmax is a function. It changes scores to probabilities that sum to 1.</li>
+      <li>Select one token from the probabilities. This selection is sampling.</li>
+      <li>Add the token to the sequence.</li>
+      <li>Stop if the token is EOS or if the sequence is too long. EOS means end of sequence.</li>
+      <li>If you did not stop, repeat from step 2.</li>
+      <li>Change the tokens back to text.</li>
+    </ol>
+    <p>The model does not plan a paragraph. Each step uses all previous steps. This gives coherent text.</p>
+    <h4>Decoding: randomness and control</h4>
+    <table>
+      <tr><th>Knob</th><th>What it does</th><th>When to use it</th></tr>
+      <tr><td><code>temperature</code></td><td>Makes the distribution sharp or flat. T near 0 gives fixed output. T near 1 or more gives varied output.</td><td>Use T near 0 for code, data extraction, and tests. Use 0.7 to 1.0 for ideas and writing.</td></tr>
+      <tr><td><code>top_p</code> (nucleus)</td><td>Selects from the smallest set of tokens with total probability p.</td><td>0.9 to 0.95 is a common default. Use a lower value for more focus.</td></tr>
+      <tr><td><code>top_k</code></td><td>Uses only the k most likely tokens.</td><td>An option instead of top_p. Common in open models.</td></tr>
+      <tr><td><code>max_tokens</code>, stop sequences</td><td>Hard limits on length. Signals to stop.</td><td>Always set them in production. They limit cost.</td></tr>
+    </table>
+    <div class="callout violet"><strong>Why the same prompt gives different answers</strong>Sampling selects by chance. The same prompt with T above 0 gives different tokens. Different tokens give different text. This is useful for variety. Note: For tests and production, set T to 0 and fix the seed. Then the output is stable.</div>
+    <div class="callout amber"><strong>A key limit</strong>A base language model predicts likely text. It does not predict true text. Fluent text is not always factual text. Note: Hallucination is not a defect of the loop. Hallucination means the model writes text that sounds true but is not true. The loop has no source of truth. Fixes live outside the loop. RAG is one fix. RAG means retrieval-augmented generation. It gives the model documents to read before it answers. Module 5 describes these fixes.</div>
+    <div class="quiz"><h4>Check your understanding</h4>
+      <ol>
+        <li>Why does a lower temperature give more fixed output? Use math in your answer.</li>
+        <li>A model miscounts letters in a word. Explain this with tokenization.</li>
+        <li>Is beam search better than sampling? When do you use each method?</li>
+      </ol>
+      <details><summary>Hints</summary>1. Softmax divides logits by T. As T nears 0, the largest logit wins. The result nears argmax. 2. The model uses token IDs, not letters. "Strawberry" can be 2 or 3 tokens. 3. Beam search is a method. It keeps the best few options at each step. It finds the most likely sequence. Use it for translation. Sampling gives variety. Use it for creative tasks.</details>
+    </div>
+  </article>
+
+  <!-- LESSON 1.3 -->
+  <article class="lesson" id="l13">
+    <p class="lno">Lesson 1.3</p>
+    <h3>Transformers and attention — the main mechanism</h3>
+    <p>Before 2017, sequence models were recurrent. RNNs and LSTMs are recurrent models. They read one token at a time. They keep a hidden state. The hidden state is the memory of the model.</p>
+    <p>They had two large problems. First, no parallel work. Step t waits for step t−1. Second, the vanishing gradient problem. Gradients are the training signals. Over long sequences they become very small. Then learning stops.</p>
+    <p>The Transformer removed recurrence. The paper is "Attention Is All You Need" (Vaswani et al., 2017). It uses attention instead.</p>
+    <h4>Attention in one paragraph</h4>
+    <p>Attention lets a token see all other tokens. It combines their information with weights. The weights come from learned relevance.</p>
+    <p>Example: "The animal didn't cross the street because it was too tired". The word "it" must link to "animal". Attention gives a high weight to "animal". It gives a low weight to "street". This selection by content is the main idea.</p>
+    <h4>Self-attention: Q, K, and V</h4>
+    <p>Self-attention is attention inside one sequence. The model changes each token embedding into three vectors. An embedding is a vector. A vector is a list of numbers. It represents the token.</p>
+    <ul>
+      <li><strong>Query (Q):</strong> what the token requests.</li>
+      <li><strong>Key (K):</strong> what the token offers.</li>
+      <li><strong>Value (V):</strong> what the token gives if selected.</li>
+    </ul>
+    <p>The relevance of token j to token i is the dot product Q_i · K_j. The dot product measures the match of two vectors. Softmax changes the scores to weights. The weights select the V vectors.</p>
+    <div class="math">Attention(Q, K, V) = softmax(QK<sup>T</sup> / √d<sub>k</sub>) · V</div>
+    <p>The √d_k term keeps the scores small in large dimensions. Large scores would flatten the softmax. Then the gradients would vanish and learning would stop. This is only matrix multiplication. It runs in parallel for all positions. This parallelism is why Transformers scale. RNNs cannot do this.</p>
+    <h4>Multi-head attention</h4>
+    <p>One attention head learns one type of relation. Example: subject to verb. Multi-head attention runs many heads in parallel. A common number is 32 heads. Each head has its own Q, K, and V. Then the model joins the results.</p>
+    <p>Heads specialize. Some learn grammar. Some learn links between words. Some learn position patterns. The model handles many aspects at the same time.</p>
+    <h4>Position must be added</h4>
+    <p>Attention does not know order. If you shuffle the tokens, the result is the same. So the model adds position information. A positional encoding is a vector. It tells the position of a token in the sequence.</p>
+    <p>Early models used fixed waves or learned vectors. Modern LLMs use RoPE. RoPE means Rotary Position Embeddings. It rotates the Q and K vectors by position. It handles long texts better.</p>
+    <h4>The full Transformer block</h4>
+<pre><code>x = x + MultiHeadAttention(LayerNorm(x))   # communicate between positions
+x = x + FeedForward(LayerNorm(x))            # per-position computation (MLP)
+# stacked N times (e.g., 32–96 layers); residual connections (+) let
+# gradients flow through depth — without them, deep nets don't train.</code></pre>
+    <p>The block has two main steps. Here they are as actions:</p>
+    <ol>
+      <li>Normalize the input with LayerNorm. LayerNorm keeps the numbers stable.</li>
+      <li>Run multi-head attention. Add the input back to the output. This is a residual connection. A residual connection adds the input of a layer to its output.</li>
+      <li>Normalize again with LayerNorm.</li>
+      <li>Run the feed-forward network. It works on each position alone. Add the input back.</li>
+      <li>Repeat for all layers. Models use 32 to 96 layers.</li>
+    </ol>
+    <ul>
+      <li>The <strong>feed-forward network</strong> holds most parameters. It is a 2-layer MLP. MLP means multi-layer perceptron. It is a small neural network. Modern models often use SwiGLU. SwiGLU is a modern activation function. Most "knowledge" lives here. Attention is the routing.</li>
+      <li><strong>Decoder-only</strong> models (GPT, Claude, Llama, DeepSeek) use causal masking. Causal masking stops a token from seeing later tokens. This matches next-token prediction. This is the standard for LLMs.</li>
+      <li><strong>Encoder-only</strong> models (BERT) read in both directions. They are good for classification and for embeddings. They cannot generate text.</li>
+      <li><strong>Encoder-decoder</strong> models (T5) read the input in both directions. Then they generate the output. They were common for translation. They are rare in new LLMs.</li>
+    </ul>
+    <h4>Why models behave differently (preview of Module 3)</h4>
+    <p>The Transformer frame is the same. But models act differently. The causes are the data mix, the scale, the tokenizer, small training changes, and post-training. Post-training includes instruction tuning and RLHF.</p>
+    <p>RLHF means reinforcement learning from human feedback. It trains the model to prefer answers that humans rate highly.</p>
+    <p>Architecture is about 20 percent of the story. The rest is the training data and the training method.</p>
+    <div class="callout"><strong>The three ideas to keep</strong>1. Attention routes information in parallel. It uses learned relevance. 2. Many layers with residual connections change this routing into reasoning-like behavior. 3. The decoder-only model trained on next-token prediction is the modern LLM. The rest is support around it.</div>
+    <div class="quiz"><h4>Check your understanding</h4>
+      <ol>
+        <li>Why could RNNs not use GPUs like Transformers can?</li>
+        <li>What breaks if you remove positional encodings? Give one example.</li>
+        <li>Why do new LLMs use decoder-only models and not encoder-decoder models?</li>
+      </ol>
+      <details><summary>Hints</summary>1. RNNs have a chain of steps. Step t needs step t−1. They cannot run in parallel. Attention computes all pairs at once. 2. "Dog bites man" and "man bites dog" become the same. Attention without position is a bag of tokens. 3. Next-token prediction looks only backward. Decoder-only models match this task. They are simple and they scale. One model understands and generates.</details>
+    </div>
+  </article>
+
+  <article class="lesson" id="l1wrap">
+    <p class="lno">Module 1 · Wrap-up</p>
+    <h3>What you can now explain</h3>
+    <ul>
+      <li>The nesting: AI holds ML. ML holds deep learning. Deep learning holds generative AI. Generative AI holds LLMs. You know what each level adds.</li>
+      <li>A language model predicts the next token. You know tokenization, the sampling loop, temperature, and top-p.</li>
+      <li>You know why attention replaced recurrence. You know Q, K, and V. You know the attention formula, multi-head attention, positional encodings, and the decoder-only block.</li>
+      <li>You know why fluent text is not always true. You know why one prompt can give many answers.</li>
+    </ul>
+    <p><strong>Coming in Module 2:</strong> how teams train these models. You will learn pretraining at scale. Pretraining teaches the model from large text. You will learn supervised fine-tuning. It trains the model on example questions and answers. You will learn RLHF and DPO. DPO means direct preference optimization. Both align the model with human preference. You will learn data selection and scaling laws. Scaling laws predict skill from compute.</p>
+  </article>
+</section>
+<div class="pager">
+<a href="index.html"><span class="dir">&larr; Start</span><span class="ttl">Course home</span></a>
+<a class="next" href="module2.html"><span class="dir">Next &rarr;</span><span class="ttl">Module 2: Training LLMs</span></a>
+</div>
+
+<footer>
+  <p><strong>LLM Deep Dive</strong> — a structured engineering course. Modules 1–6 published October 2026, written in Simplified Technical English (ASD-STE100): short sentences, one idea per sentence, plain words.</p>
+  <p>Key reference: Vaswani et al., <em>Attention Is All You Need</em> (2017).</p>
+</footer>
+</div>
+</body>
+</html>
